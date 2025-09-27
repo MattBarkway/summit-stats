@@ -26,17 +26,17 @@ async fn main() {
         .trim()
         .to_string();
 
-    // let state = Arc::new(AppState {
-    //     client_id,
-    //     client_secret,
-    //     redirect_uri,
-    // });
-
-    let state = AppState {
+    let state = Arc::new(AppState {
         client_id,
         client_secret,
         redirect_uri,
-    };
+    });
+
+    // let state = AppState {
+    //     client_id,
+    //     client_secret,
+    //     redirect_uri,
+    // };
     let app = routes::routes().with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();

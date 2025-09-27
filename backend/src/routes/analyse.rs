@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::AppState;
 use axum::{Json, Router, routing::get};
 use serde::Serialize;
@@ -8,7 +9,7 @@ struct Stats {
     title: String,
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes() -> Router<Arc<AppState>> {
     Router::new().route("/", get(get_stats))
 }
 

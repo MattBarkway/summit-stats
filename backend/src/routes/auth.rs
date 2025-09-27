@@ -9,14 +9,15 @@ use axum::{
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::Arc;
 
-pub fn routes() -> Router<AppState> {
+pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
         .route("/strava", get(start_oauth))
         .route("/strava/callback", get(callback))
 }
 
-async fn start_oauth(State(state): State<AppState>) -> Redirect {
+async fn start_oauth(State(state): State<Arc<AppState>>) -> Redirect {
     let url = format!(
         "https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read",
         state.client_id, state.redirect_uri
@@ -41,14 +42,14 @@ struct TokenResponse {
 }
 
 async fn callback(
-    State(state): State<AppState>,
+    State(state): State<Arc<AppState>>,
     Query(params): Query<CallbackQuery>,
 ) -> Result<Json<TokenResponse>, String> {
     let client = Client::new();
 
     let mut form = HashMap::new();
-    form.insert("client_id", state.client_id);
-    form.insert("client_secret", state.client_secret);
+    form.insert("client_id", state.client_id.clone());
+    form.insert("client_secret", state.client_secret.clone());
     form.insert("code", params.code);
     form.insert("grant_type", "authorization_code".into());
 
