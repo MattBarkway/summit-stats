@@ -9,14 +9,22 @@ struct AppState {
     redirect_uri: String,
 }
 
-
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
 
-    let client_id = std::env::var("CLIENT_ID").expect("CLIENT_ID must be set").trim().to_string();;
-    let client_secret = std::env::var("CLIENT_SECRET").expect("CLIENT_SECRET must be set").trim().to_string();
-    let redirect_uri = std::env::var("REDIRECT_URI").expect("REDIRECT_URI must be set").trim().to_string();
+    let client_id = std::env::var("CLIENT_ID")
+        .expect("CLIENT_ID must be set")
+        .trim()
+        .to_string();
+    let client_secret = std::env::var("CLIENT_SECRET")
+        .expect("CLIENT_SECRET must be set")
+        .trim()
+        .to_string();
+    let redirect_uri = std::env::var("REDIRECT_URI")
+        .expect("REDIRECT_URI must be set")
+        .trim()
+        .to_string();
 
     // let state = Arc::new(AppState {
     //     client_id,

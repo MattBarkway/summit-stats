@@ -1,14 +1,14 @@
+use crate::AppState;
+use axum::extract::State;
 use axum::{
+    Json, Router,
     extract::Query,
     response::{Html, Redirect},
     routing::get,
-    Json, Router,
 };
-use serde::{Deserialize, Serialize};
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use axum::extract::State;
-use crate::AppState;
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -40,7 +40,10 @@ struct TokenResponse {
     athlete: serde_json::Value,
 }
 
-async fn callback(State(state): State<AppState>,Query(params): Query<CallbackQuery>) -> Result<Json<TokenResponse>, String> {
+async fn callback(
+    State(state): State<AppState>,
+    Query(params): Query<CallbackQuery>,
+) -> Result<Json<TokenResponse>, String> {
     let client = Client::new();
 
     let mut form = HashMap::new();

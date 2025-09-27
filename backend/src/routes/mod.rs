@@ -1,8 +1,8 @@
 pub mod analyse;
 pub mod auth;
 
-use axum::Router;
 use crate::AppState;
+use axum::Router;
 
 pub fn routes() -> Router<AppState> {
     Router::new()
