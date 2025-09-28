@@ -7,10 +7,10 @@ use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
 
 use tower_sessions_sqlx_store::PostgresStore;
+pub mod extractors;
 pub mod models;
 pub mod routes;
 pub mod utilities;
-pub mod extractors;
 
 #[derive(Clone)]
 pub struct AppState {

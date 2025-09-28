@@ -1,16 +1,12 @@
-use std::sync::Arc;
-use axum::{
-    extract::FromRequestParts,
-    http::{
-        StatusCode,
-        request::Parts,
-    },
-};
-use axum::extract::FromRef;
-use tower_sessions::Session;
 use crate::AppState;
 use crate::extractors::current_user::CurrentUser;
 use crate::utilities::strava::UserStravaClient;
+use axum::extract::FromRef;
+use axum::{
+    extract::FromRequestParts,
+    http::{StatusCode, request::Parts},
+};
+use std::sync::Arc;
 
 pub struct StravaClient {
     pub client: UserStravaClient,
@@ -23,10 +19,7 @@ where
 {
     type Rejection = (StatusCode, &'static str);
 
-    async fn from_request_parts(
-        parts: &mut Parts,
-        state: &S,
-    ) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = Arc::<AppState>::from_ref(state);
 
         let CurrentUser { athlete_id } = CurrentUser::from_request_parts(parts, &state)

@@ -21,8 +21,8 @@ pub fn routes() -> Router<Arc<AppState>> {
 
 async fn start_oauth(State(state): State<Arc<AppState>>) -> Redirect {
     let url = format!(
-        "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read_all,activity:read_all", state.strava_url,
-        state.client_id, state.redirect_uri
+        "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read_all,activity:read_all",
+        state.strava_url, state.client_id, state.redirect_uri
     );
     Redirect::to(&url)
 }
