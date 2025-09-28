@@ -1,8 +1,8 @@
 use sqlx::PgPool;
-use std::sync::Arc;
 use strava_wrapper::api::StravaAPI;
 
 pub struct UserStravaClient {
+    url: String,
     api: StravaAPI,
     access_token: String,
     refresh_token: String,
@@ -12,7 +12,7 @@ pub struct UserStravaClient {
 }
 
 impl UserStravaClient {
-    pub async fn new(db: PgPool, athlete_id: i64) -> Result<Self, String> {
+    pub async fn new(db: PgPool, athlete_id: i64, strava_url: &str) -> Result<Self, String> {
         let row = sqlx::query!(
             "SELECT access_token, refresh_token, expires_at FROM tokens WHERE athlete_id = $1",
             athlete_id
@@ -22,7 +22,8 @@ impl UserStravaClient {
         .map_err(|e| e.to_string())?;
 
         Ok(Self {
-            api: StravaAPI::new("https://www.strava.com/api", row.access_token.clone()),
+            api: StravaAPI::new(&format!("{}/api", strava_url), row.access_token.clone()),
+            url: strava_url.to_string(),
             access_token: row.access_token,
             refresh_token: row.refresh_token,
             expires_at: row.expires_at,
@@ -46,7 +47,7 @@ impl UserStravaClient {
             form.insert("refresh_token", &self.refresh_token);
 
             let res = client
-                .post("https://www.strava.com/oauth/token")
+                .post(format!("{}/oauth/token", &self.url))
                 .form(&form)
                 .send()
                 .await
@@ -76,7 +77,8 @@ impl UserStravaClient {
                 .await
                 .map_err(|e| e.to_string())?;
 
-            self.api = StravaAPI::new("https://www.strava.com/api", &self.access_token);
+            // TODO: add an update_token() method?
+            self.api = StravaAPI::new(&self.url, &self.access_token);
         }
 
         Ok(())
