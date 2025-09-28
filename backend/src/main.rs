@@ -7,6 +7,7 @@ use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
 
 use tower_sessions_sqlx_store::PostgresStore;
+pub mod extractors;
 pub mod models;
 pub mod routes;
 pub mod utilities;
@@ -14,6 +15,7 @@ pub mod utilities;
 #[derive(Clone)]
 pub struct AppState {
     pub db: sqlx::PgPool,
+    pub strava_url: String,
     pub client_id: String,
     pub client_secret: String,
     pub redirect_uri: String,
@@ -37,6 +39,10 @@ async fn main() {
         .to_string();
     let db_url = std::env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set")
+        .trim()
+        .to_string();
+    let strava_url = std::env::var("STRAVA_URL")
+        .expect("STRAVA_URL must be set")
         .trim()
         .to_string();
 
@@ -66,6 +72,7 @@ async fn main() {
         client_id,
         client_secret,
         redirect_uri,
+        strava_url,
     });
 
     let app = routes::routes().with_state(state).layer(session_layer);
