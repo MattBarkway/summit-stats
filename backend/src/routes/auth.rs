@@ -1,4 +1,5 @@
 use crate::AppState;
+use crate::models::api::auth::TokenResponse;
 use axum::extract::State;
 use axum::{
     Json, Router,
@@ -10,6 +11,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
+use tower_sessions::Session;
 
 pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
@@ -31,27 +33,18 @@ struct CallbackQuery {
     scope: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct TokenResponse {
-    token_type: String,
-    expires_at: u64,
-    expires_in: u64,
-    refresh_token: String,
-    access_token: String,
-    athlete: serde_json::Value,
-}
-
 async fn callback(
     State(state): State<Arc<AppState>>,
     Query(params): Query<CallbackQuery>,
-) -> Result<Json<TokenResponse>, String> {
+    mut session: Session,
+) -> Result<Redirect, String> {
     let client = Client::new();
 
     let mut form = HashMap::new();
     form.insert("client_id", state.client_id.clone());
     form.insert("client_secret", state.client_secret.clone());
-    form.insert("code", params.code);
     form.insert("grant_type", "authorization_code".into());
+    form.insert("code", params.code);
 
     let res = client
         .post("https://www.strava.com/oauth/token")
@@ -65,5 +58,29 @@ async fn callback(
     }
 
     let token: TokenResponse = res.json().await.map_err(|e| e.to_string())?;
-    Ok(Json(token))
+
+    sqlx::query!(
+        r#"
+        INSERT INTO tokens (athlete_id, access_token, refresh_token, expires_at)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (athlete_id) DO UPDATE
+          SET access_token = EXCLUDED.access_token,
+              refresh_token = EXCLUDED.refresh_token,
+              expires_at = EXCLUDED.expires_at
+        "#,
+        token.athlete.id,
+        token.access_token,
+        token.refresh_token,
+        token.expires_at,
+    )
+    .execute(&state.db)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    session
+        .insert("athlete_id", token.athlete.id)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(Redirect::to("/dashboard"))
 }

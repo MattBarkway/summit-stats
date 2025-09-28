@@ -28,3 +28,19 @@ services:
     command: npm run dev
     depends_on:
       - backend
+
+  database:
+    image: postgres:16
+    container_name: strava_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: strava_user
+      POSTGRES_PASSWORD: strava_password
+      POSTGRES_DB: strava_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
