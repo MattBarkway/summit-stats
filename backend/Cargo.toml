@@ -17,3 +17,5 @@ strava-wrapper = { version = "0.0.2", path = "../../strava-api-wrapper/strava-wr
 chrono = "0.4.42"
 async-trait = "0.1.89"
 http = "1.3.1"
+hyper = "1.7.0"
+tower-http = { version = "0.6.6", features = ["cors"] }
