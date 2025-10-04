@@ -75,7 +75,7 @@ async fn main() {
     );
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false) // set true once deployed
-        .with_expiry(Expiry::OnInactivity(Duration::minutes(30)));
+        .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
 
     let state = Arc::new(AppState {
         db: pool,
