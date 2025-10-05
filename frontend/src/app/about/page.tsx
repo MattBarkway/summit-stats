@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import React from "react";
 export default function AboutPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800 p-6">
@@ -11,7 +12,16 @@ export default function AboutPage() {
           height={100}
         />
       </div>
-      <h1 className="text-4xl font-bold mb-4">About SummitStats</h1>
+      <h1 className="text-4xl font-bold mb-4">
+        About
+        <span className={"font-light text-orange-500 font-stretch-150%"}>
+          {" "}
+          Summit
+        </span>
+        <span className={"font-light text-emerald-600 font-stretch-150%"}>
+          Stats
+        </span>
+      </h1>
       <p className="text-lg mb-8 text-center max-w-xl">
         <br />
         This is a tech demo to visualize your Strava data. Both the web service

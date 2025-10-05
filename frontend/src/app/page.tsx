@@ -31,8 +31,14 @@ export default function Home() {
       </div>
 
       <h1 className="text-4xl font-bold mb-6 text-gray-700">
-        Welcome to <span className={"font-light text-orange-500 font-stretch-150%"}>{" "}Summit</span>
-        <span className={"font-light text-emerald-600 font-stretch-150%"}>Stats</span>
+        Welcome to
+        <span className={"font-light text-orange-500 font-stretch-150%"}>
+          {" "}
+          Summit
+        </span>
+        <span className={"font-light text-emerald-600 font-stretch-150%"}>
+          Stats
+        </span>
       </h1>
       <p className="text-lg text-gray-600 mb-8">
         Connect with Strava to see your personalized activity dashboard.
