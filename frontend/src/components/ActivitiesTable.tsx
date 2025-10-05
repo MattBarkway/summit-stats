@@ -15,8 +15,6 @@ interface Activity {
 }
 
 export default function ActivitiesDataTable() {
-  // TODO:
-  //  - Add separate links per row, to strava and to an in detail analysis page on the site
   const [page, setPage] = useState(1);
   const perPage = 10;
   const totalCount = -1;

@@ -14,6 +14,6 @@ export function useAuth() {
   return useQuery({
     queryKey: ["auth"],
     queryFn: fetchAuth,
-    staleTime: 1000 * 60 * 5, // cache 5 min
+    staleTime: 1000 * 60 * 5,
   });
 }

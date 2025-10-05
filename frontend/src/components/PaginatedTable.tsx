@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import clsx from "clsx";
 import DataTable from "@/components/Table";
 
 interface PaginatedTableProps<TData> {
-  data: TData[] | null; // Current page data
-  columns: ColumnDef<TData>[]; // Column definitions
+  data: TData[] | null;
+  columns: ColumnDef<TData>[];
   loading?: boolean;
   onRowClick?: (row: TData) => void;
-  totalPages?: number; // Total pages
-  initialPage?: number; // Optional initial page
-  onPageChange?: (page: number) => void; // Optional callback for page changes
+  totalPages?: number;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export default function PaginatedTable<TData>({

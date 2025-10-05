@@ -5,11 +5,6 @@ import Navbar, { NavItem } from "@/components/NavBar";
 import { useAuth } from "@/hooks/useAuth";
 
 const loggedInNavItems: NavItem[] = [
-  // TODO
-  //  - only render this for logged in/authenticated users
-  //  - Create Achievements page
-  //  - Create stats page
-  //  - Create static About page
   { label: "🏠 Dashboard", href: "/dashboard" },
   { label: "🏅 Achievements", href: "/achievements" },
   { label: "🤓 Stats", href: "/stats" },
