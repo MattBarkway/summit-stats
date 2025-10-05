@@ -1,7 +1,7 @@
+use http::Method;
+use http::header::CONTENT_TYPE;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-use http::header::CONTENT_TYPE;
-use http::Method;
 use tokio::signal;
 use tokio::task::AbortHandle;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
@@ -14,7 +14,6 @@ pub mod extractors;
 pub mod models;
 pub mod routes;
 pub mod utilities;
-
 
 #[derive(Clone)]
 pub struct AppState {
@@ -85,7 +84,10 @@ async fn main() {
         strava_url,
     });
 
-    let app = routes::routes().with_state(state).layer(session_layer).layer(cors);
+    let app = routes::routes()
+        .with_state(state)
+        .layer(session_layer)
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app)
