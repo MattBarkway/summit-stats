@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aerie",
+  title: "SummitStats",
   description: "Analyse your strava activities!",
 };
 

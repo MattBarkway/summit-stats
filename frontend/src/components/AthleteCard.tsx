@@ -29,10 +29,10 @@ export default function AthleteCard() {
       <img
         src={profile_medium}
         alt={`${firstname} ${lastname}`}
-        className="w-24 h-24 rounded-full object-cover bg-gray-200"
+        className="w-24 h-24 rounded-full object-cover bg-gray-200 border-2 border-orange-500"
       />
       <div>
-        <h2 className="text-2xl font-semibold">
+        <h2 className="text-2xl font-semibold text-emerald-600">
           {firstname} {lastname}
         </h2>
         <p className="mt-1">

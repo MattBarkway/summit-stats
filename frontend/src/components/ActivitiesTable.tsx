@@ -55,7 +55,7 @@ export default function ActivitiesDataTable() {
         },
       }),
       columnHelper.accessor("total_elevation_gain", {
-        header: "Elevation Gain",
+        header: "Elevation Gain (M)",
         cell: (info) => Math.round(info.getValue()),
       }),
       columnHelper.accessor("id", {
@@ -67,10 +67,10 @@ export default function ActivitiesDataTable() {
               <div className="flex gap-2 items-center">
                   <a
                       href={`/activities/${id}`}
-                      title="Analyse with Aerie"
+                      title="Analyse with SummitStats"
                       className="flex items-center justify-center w-4 h-4 bg-gray-50 text-emerald-600 hover:bg-gray-200 rounded text-xs"
                   >
-                      A
+                      🔍
                   </a>
 
                   <a

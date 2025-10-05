@@ -21,9 +21,13 @@ export default function Navbar({ items }: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link
           href="/"
-          className="text-xl text-emerald-600 font-extrabold font-stretch-ultra-expanded"
+          className="text-xl text-emerald-600 font-stretch-150%"
         >
-          🕊️ Aerie
+          🔍
+          <span className={"text-orange-500"}>
+          {" "}Summit
+        </span>
+          Stats
         </Link>
         <div className="hidden md:flex space-x-6 text-gray-700 font-medium">
           {items.map((item) => (
