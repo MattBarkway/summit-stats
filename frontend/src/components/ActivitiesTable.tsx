@@ -58,6 +58,38 @@ export default function ActivitiesDataTable() {
         header: "Elevation Gain",
         cell: (info) => Math.round(info.getValue()),
       }),
+      columnHelper.accessor("id", {
+        header: "View",
+        cell: (info) => {
+          const id = info.getValue<number>();
+
+          return (
+              <div className="flex gap-2 items-center">
+                  <a
+                      href={`/activities/${id}`}
+                      title="Analyse with Aerie"
+                      className="flex items-center justify-center w-4 h-4 bg-gray-50 text-emerald-600 hover:bg-gray-200 rounded text-xs"
+                  >
+                      A
+                  </a>
+
+                  <a
+                      href={`https://www.strava.com/activities/${id}`}
+                      target="_blank"
+                      title="View on Strava"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-4 h-4"
+                  >
+                      <img
+                          src="/strava-favicon.png"
+                          alt="Strava"
+                          className="w-4 h-4"
+                      />
+                  </a>
+              </div>
+          );
+        },
+      }),
     ],
     [columnHelper],
   );

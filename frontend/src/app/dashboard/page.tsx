@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar,
+  Bar, PieChart,
 } from "recharts";
 import ActivitiesTable from "@/components/ActivitiesTable";
 import DistancePlot from "@/components/DistancePlot";
@@ -42,17 +42,12 @@ export default function Dashboard() {
           <DistancePlot />
         </div>
 
-        {/* Bar Chart */}
+        {/* Pie Chart */}
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Distance Per Activity</h3>
+          <h3 className="text-xl font-semibold mb-4">Activity types</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={[]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="distance" fill="#f97316" />
-            </BarChart>
+            <PieChart data={[]}>
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </section>

@@ -14,7 +14,7 @@ import { useActivities } from "@/hooks/useActivites";
 import { v4 } from "uuid";
 
 export default function CumulativeDistancePlot() {
-  const { data, isLoading, error } = useActivities();
+  const { data, isLoading, error } = useActivities(1, 100);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error fetching activities</p>;
@@ -100,25 +100,10 @@ export default function CumulativeDistancePlot() {
         <Line
           type="monotone"
           dataKey="cumulativeDistance"
-          stroke="#f97316"
+          stroke="#059669"
           strokeWidth={3}
           dot={(props) => {
-            const { payload, cx, cy } = props;
-            // Only draw dot if there is a real activity
-            if (!payload.activity) return null;
-            const r = 3;
-            return (
-              <circle
-                key={v4()}
-                cx={cx}
-                cy={cy}
-                r={r}
-                fill="#fff"
-                stroke="#f97316"
-                strokeWidth={2}
-                style={{ pointerEvents: "all" }}
-              />
-            );
+            return null;
           }}
         />
       </LineChart>

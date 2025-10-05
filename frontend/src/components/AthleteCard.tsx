@@ -1,10 +1,9 @@
 "use client";
 import React from "react";
 import { useAthlete } from "@/hooks/useAthlete";
-import { Athlete } from "@/app/types/athlete";
 
 export default function AthleteCard() {
-  const { data, isLoading, error } = useAthlete<Athlete>();
+  const { data, isLoading, error } = useAthlete();
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error fetching athlete</p>;
@@ -36,8 +35,19 @@ export default function AthleteCard() {
         <h2 className="text-2xl font-semibold">
           {firstname} {lastname}
         </h2>
-        <p className="mt-1">Total Activities: {totalActivities}</p>
-        <p>Total Distance: {totalDistanceKm.toFixed(1)} km</p>
+        <p className="mt-1">
+          Total Activities: <strong>{totalActivities}</strong>
+        </p>
+        <p>
+          Total Distance:{" "}
+          <strong>
+            {totalDistanceKm.toLocaleString(undefined, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}{" "}
+            km
+          </strong>
+        </p>
       </div>
     </div>
   );

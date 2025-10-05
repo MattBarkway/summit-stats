@@ -6,15 +6,19 @@ export default function AboutPage() {
       <div className="mb-6">
         <Image
           src="/favicon-large.png"
-          alt="ActivityAnalyser logo"
+          alt="Aerie logo"
           width={100}
           height={100}
           className="rounded-full"
         />
       </div>
-      <h1 className="text-4xl font-bold mb-4">About ActivityAnalyser</h1>
+      <h1 className="text-4xl font-bold mb-4">About Aerie</h1>
       <p className="text-lg mb-8 text-center max-w-xl">
-        A quick tech demo to visualize your Strava data. Both the web service
+        <span className="italic">An Aerie, is a nest on a cliffside, high above its surroundings.
+        From this vantage point, an observer can analyse the landscape below.</span>
+        <br />
+        <br />
+        This is a tech demo to visualize your Strava data. Both the web service
         project and the Strava API wrapper are available on GitHub:
       </p>
 
