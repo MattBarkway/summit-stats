@@ -15,7 +15,7 @@ export default function AboutPage() {
       <p className="text-lg mb-8 text-center max-w-xl">
         <br />
         This is a tech demo to visualize your Strava data. Both the web service
-        project and the Strava API wrapper are available on GitHub:
+        project and the Strava API wrapper are available to view on GitHub:
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">

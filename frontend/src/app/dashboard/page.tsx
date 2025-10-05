@@ -7,7 +7,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar, PieChart,
+  Bar,
+  PieChart,
 } from "recharts";
 import ActivitiesTable from "@/components/ActivitiesTable";
 import DistancePlot from "@/components/DistancePlot";
@@ -46,8 +47,7 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-xl font-semibold mb-4">Activity types</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <PieChart data={[]}>
-            </PieChart>
+            <PieChart data={[]}></PieChart>
           </ResponsiveContainer>
         </div>
       </section>

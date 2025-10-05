@@ -24,15 +24,15 @@ export default function Home() {
       <div className="mb-6">
         <Image
           src="/favicon-large.png"
-          alt="ActivityAnalyser logo"
+          alt="SummitStats logo"
           width={100}
           height={100}
-          className="rounded-full"
         />
       </div>
 
       <h1 className="text-4xl font-bold mb-6 text-gray-700">
-        Welcome to ActivityAnalyser
+        Welcome to <span className={"font-light text-orange-500 font-stretch-150%"}>{" "}Summit</span>
+        <span className={"font-light text-emerald-600 font-stretch-150%"}>Stats</span>
       </h1>
       <p className="text-lg text-gray-600 mb-8">
         Connect with Strava to see your personalized activity dashboard.
