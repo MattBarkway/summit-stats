@@ -1,7 +1,10 @@
+use http::Method;
+use http::header::CONTENT_TYPE;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use tokio::signal;
 use tokio::task::AbortHandle;
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 use tower_sessions::cookie::time::Duration;
 use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
@@ -46,6 +49,12 @@ async fn main() {
         .trim()
         .to_string();
 
+    let cors = CorsLayer::new()
+        .allow_origin(AllowOrigin::exact("http://localhost:3000".parse().unwrap()))
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers([CONTENT_TYPE])
+        .allow_credentials(true);
+
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&db_url)
@@ -65,7 +74,7 @@ async fn main() {
     );
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false) // set true once deployed
-        .with_expiry(Expiry::OnInactivity(Duration::minutes(30)));
+        .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
 
     let state = Arc::new(AppState {
         db: pool,
@@ -75,7 +84,10 @@ async fn main() {
         strava_url,
     });
 
-    let app = routes::routes().with_state(state).layer(session_layer);
+    let app = routes::routes()
+        .with_state(state)
+        .layer(session_layer)
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app)

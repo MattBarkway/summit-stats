@@ -82,5 +82,5 @@ async fn callback(
         .await
         .map_err(|e| e.to_string())?;
 
-    Ok(Redirect::to("/dashboard"))
+    Ok(Redirect::to("http://localhost:3000/dashboard"))
 }
