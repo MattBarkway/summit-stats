@@ -17,7 +17,7 @@ async function fetchActivities(
   perPage: number,
 ): Promise<Activity[]> {
   const res = await fetch(
-    `http://localhost:8000/stats/activities?page=${page || 1}&per_page=${perPage || 10}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/stats/activities?page=${page || 1}&per_page=${perPage || 10}`,
     {
       credentials: "include",
     },

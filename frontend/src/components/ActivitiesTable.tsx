@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { createColumnHelper } from "@tanstack/react-table";
+import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
 import { useActivities } from "@/hooks/useActivites";
 import PaginatedTable from "@/components/PaginatedTable";
 
@@ -23,7 +23,7 @@ export default function ActivitiesDataTable() {
 
   const columnHelper = createColumnHelper<Activity>();
 
-  const columns = useMemo(
+  const columns: any[] = useMemo(
     () => [
       columnHelper.accessor("name", {
         header: "Name",

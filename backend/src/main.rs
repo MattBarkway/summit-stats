@@ -10,6 +10,8 @@ use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
 
 use tower_sessions_sqlx_store::PostgresStore;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+
 pub mod extractors;
 pub mod models;
 pub mod routes;
@@ -26,28 +28,54 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() {
+    println!("Starting main() — env check");
+    tracing_subscriber::fmt().with_writer(std::io::stdout.with_max_level(tracing::Level::INFO))
+        .init();;
+    tracing::info!("Starting strava_analyser...");
+    for (key, value) in std::env::vars() {
+        println!("{}={}", key, value);
+    }
     dotenv::dotenv().ok();
 
     let client_id = std::env::var("CLIENT_ID")
         .expect("CLIENT_ID must be set")
         .trim()
         .to_string();
+    tracing::info!("Got CLIENT_ID...");
     let client_secret = std::env::var("CLIENT_SECRET")
         .expect("CLIENT_SECRET must be set")
         .trim()
         .to_string();
+    tracing::info!("Got CLIENT_SECRET...");
     let redirect_uri = std::env::var("REDIRECT_URI")
         .expect("REDIRECT_URI must be set")
         .trim()
         .to_string();
-    let db_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set")
-        .trim()
-        .to_string();
+    tracing::info!("Got REDIRECT_URI...");
     let strava_url = std::env::var("STRAVA_URL")
         .expect("STRAVA_URL must be set")
         .trim()
         .to_string();
+    tracing::info!("Got STRAVA_URL...");
+    let db_url = format!(
+        "postgres://{}:{}@{}:5432/{}",
+        std::env::var("DATABASE_USER")
+            .expect("DATABASE_USER must be set")
+            .trim(),
+        std::env::var("DATABASE_PASSWORD")
+            .expect("DATABASE_PASSWORD must be set")
+            .trim(),
+        std::env::var("DATABASE_HOST")
+            .expect("DATABASE_HOST must be set")
+            .trim(),
+        std::env::var("DATABASE_NAME")
+            .expect("DATABASE_NAME must be set")
+            .trim()
+    );
+    tracing::info!("Got DATABASE_URL...");
+
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let addr = format!("0.0.0.0:{}", port);
 
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::exact("http://localhost:3000".parse().unwrap()))
@@ -89,7 +117,8 @@ async fn main() {
         .layer(session_layer)
         .layer(cors);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    tracing::info!("Starting server on {}", &addr);
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle()))
         .await
