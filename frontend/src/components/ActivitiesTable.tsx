@@ -23,7 +23,7 @@ export default function ActivitiesDataTable() {
 
   const columnHelper = createColumnHelper<Activity>();
 
-  const columns = useMemo(
+  const columns: ColumnDef<Activity, unknown>[] = useMemo(
     () => [
       columnHelper.accessor("name", {
         header: "Name",

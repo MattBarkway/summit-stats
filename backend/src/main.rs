@@ -49,6 +49,9 @@ async fn main() {
         .trim()
         .to_string();
 
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let addr = format!("0.0.0.0:{}", port);
+
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::exact("http://localhost:3000".parse().unwrap()))
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
@@ -89,7 +92,7 @@ async fn main() {
         .layer(session_layer)
         .layer(cors);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle()))
         .await
