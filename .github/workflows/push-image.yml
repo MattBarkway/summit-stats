@@ -27,6 +27,6 @@ jobs:
       - name: Build and Push image
         working-directory: backend
         run: |
-          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/strava-analyser-repo/strava_analyser"
+          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/summit-stats-repo/strava_analyser"
           docker build -t "$IMAGE:${{ github.sha }}" .
           docker push "$IMAGE:${{ github.sha }}"
