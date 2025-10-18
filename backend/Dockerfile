@@ -1,12 +1,8 @@
-FROM rust:1.90-bullseye as builder
+FROM rust:1.90-bullseye AS builder
 
 WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
-
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-
-RUN cargo build --release || true
 
 COPY .sqlx .sqlx
 COPY . .
@@ -14,9 +10,13 @@ COPY . .
 ENV SQLX_OFFLINE="true"
 RUN cargo build --release
 
-FROM debian:bookworm-slim AS runtime
+FROM debian:bullseye-slim AS runtime
 
-RUN apt-get update && apt-get install -y ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    tzdata \
+    libssl1.1 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=builder /app/target/release/strava_analyser /usr/local/bin/strava_analyser
