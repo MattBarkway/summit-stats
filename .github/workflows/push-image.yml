@@ -25,6 +25,7 @@ jobs:
         run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
 
       - name: Build and Push image
+        working-directory: backend
         run: |
           IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/strava-analyser-repo/strava_analyser"
           docker build -t "$IMAGE:${{ github.sha }}" .
