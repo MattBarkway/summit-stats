@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT access_token, refresh_token, expires_at FROM tokens WHERE athlete_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "access_token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "refresh_token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "expires_at",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fc982d070ffbf4c3decb4282912367c4f28e9b15674f533214877c83b1c04e2b"
+}
