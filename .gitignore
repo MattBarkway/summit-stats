@@ -2,3 +2,6 @@
 .env
 .idea
 target/
+terraform-sa-key.json
+*.lock.hcl
+.terraform/
