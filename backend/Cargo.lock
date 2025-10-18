@@ -1993,6 +1993,8 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "strava-wrapper"
 version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81204955f611b716cfc23f3abdbcc184b3940be2f3b573c9e1fadba993e94a96"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2005,6 +2007,8 @@ dependencies = [
 [[package]]
 name = "strava-wrapper-macros"
 version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c73c69a2274d27e49718a7c3cb378aeb931511da868fe3a179a687fd8e26e5b"
 dependencies = [
  "proc-macro2",
  "quote",
