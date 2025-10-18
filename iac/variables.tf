@@ -30,3 +30,20 @@ variable "github_token" {
   type        = string
   sensitive   = true
 }
+
+variable "backend_image_tag" {
+  description = "Tag for the latest backend image"
+  type        = string
+}
+
+variable "client_id" {
+  description = "Strava client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "client_secret" {
+  description = "Strava client secret"
+  type        = string
+  sensitive   = true
+}

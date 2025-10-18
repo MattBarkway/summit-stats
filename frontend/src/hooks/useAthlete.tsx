@@ -45,7 +45,7 @@ export type Athlete = {
 };
 
 async function fetchAthlete(): Promise<Athlete> {
-  const res = await fetch("http://localhost:8000/stats/athlete", {
+  const res = await fetch("http://localhost:8080/stats/athlete", {
     credentials: "include",
   });
   if (!res.ok) {

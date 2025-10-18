@@ -16,7 +16,7 @@ export default function Home() {
 
   if (isLoading || user) return null;
   const handleConnect = () => {
-    window.location.href = "http://localhost:8000/auth/strava";
+    window.location.href = "http://localhost:8080/auth/strava";
   };
 
   return (

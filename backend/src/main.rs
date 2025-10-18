@@ -40,14 +40,25 @@ async fn main() {
         .expect("REDIRECT_URI must be set")
         .trim()
         .to_string();
-    let db_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set")
-        .trim()
-        .to_string();
     let strava_url = std::env::var("STRAVA_URL")
         .expect("STRAVA_URL must be set")
         .trim()
         .to_string();
+    let db_url = format!(
+        "postgres://{}:{}@{}:5432/{}",
+        std::env::var("DATABASE_USER")
+            .expect("DATABASE_USER must be set")
+            .trim(),
+        std::env::var("DATABASE_PASSWORD")
+            .expect("DATABASE_PASSWORD must be set")
+            .trim(),
+        std::env::var("DATABASE_HOST")
+            .expect("DATABASE_HOST must be set")
+            .trim(),
+        std::env::var("DATABASE_NAME")
+            .expect("DATABASE_NAME must be set")
+            .trim()
+    );
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
@@ -92,7 +103,8 @@ async fn main() {
         .layer(session_layer)
         .layer(cors);
 
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    tracing::info!("Starting server on {}", &addr);
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle()))
         .await
