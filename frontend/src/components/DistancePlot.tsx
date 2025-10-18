@@ -102,6 +102,7 @@ export default function CumulativeDistancePlot() {
           dataKey="cumulativeDistance"
           stroke="#059669"
           strokeWidth={3}
+          // @ts-ignore
           dot={(props) => {
             return null;
           }}
