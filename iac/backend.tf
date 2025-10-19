@@ -19,6 +19,7 @@ resource "google_cloud_run_v2_service" "backend" {
   location = var.region
   project  = var.project_name
   deletion_protection = false
+
   template {
     service_account = google_service_account.cloud_run_sa.email
     containers {
