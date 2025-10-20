@@ -40,15 +40,23 @@ jobs:
         working-directory: backend
         run: |
           IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-repo/strava_analyser"
-          docker build -t "$IMAGE:${GITHUB_SHA}" .
-          docker push "$IMAGE:${GITHUB_SHA}"
+          docker buildx create --use
+          docker buildx build \
+            --cache-from=type=registry,ref=$IMAGE:buildcache \
+            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
+            -t "$IMAGE:${{ github.sha }}" \
+            --push .
 
       - name: Build and Push frontend image
         working-directory: frontend
         run: |
           IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-frontend-repo/summit-stats-frontend"
-          docker build -t "$IMAGE:${GITHUB_SHA}" .
-          docker push "$IMAGE:${GITHUB_SHA}"
+          docker buildx create --use
+          docker buildx build \
+            --cache-from=type=registry,ref=$IMAGE:buildcache \
+            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
+            -t "$IMAGE:${{ github.sha }}" \
+            --push .
 
   deploy:
     runs-on: ubuntu-latest
