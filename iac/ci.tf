@@ -43,22 +43,25 @@ resource "google_service_account_iam_binding" "github_impersonation" {
   ]
 }
 
-resource "google_project_iam_member" "artifact_writer" {
-  project = var.project_name
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
+locals {
+  github_actions_roles = [
+    "roles/artifactregistry.writer",          # Push Docker images
+    "roles/storage.objectAdmin",              # Access Terraform state bucket
+    "roles/secretmanager.secretAccessor",     # Read secrets
+    "roles/run.admin",                        # Deploy Cloud Run services
+    "roles/iam.serviceAccountViewer",         # Read service accounts
+    "roles/iam.workloadIdentityPoolViewer",   # Read workload identity pools
+    "roles/compute.viewer",                   # Read Compute resources
+    "roles/vpcaccess.viewer"                  # Read VPC connectors
+  ]
 }
 
-resource "google_project_iam_member" "gcs_storage_admin" {
-  project = var.project_name
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
+resource "google_project_iam_member" "github_actions_roles" {
+  for_each = toset(local.github_actions_roles)
+  project  = var.project_name
+  role     = each.key
+  member   = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-resource "google_project_iam_member" "secret_manager_admin" {
-  project = var.project_name
-  role    = "roles/secretmanager.admin"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
-}
 
 

@@ -86,6 +86,6 @@ jobs:
             -var="owner_id=${{ secrets.OWNER_ID }}" \
             -var="project_id=${{ secrets.PROJECT_ID }}" \
             -var="project_name=${{ secrets.PROJECT_NAME }}" \
-            -var="github_token=${{ secrets.GITHUB_TOKEN }}" \
+            -var="github_token=${{ secrets.GH_TOKEN }}" \
             -var="client_id=${{ secrets.CLIENT_ID }}" \
             -var="client_secret=${{ secrets.CLIENT_SECRET }}"

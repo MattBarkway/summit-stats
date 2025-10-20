@@ -45,3 +45,9 @@ resource "github_actions_secret" "client_secret" {
   secret_name = "CLIENT_SECRET"
   plaintext_value         = var.client_secret
 }
+
+resource "github_actions_secret" "github_token" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "GH_TOKEN"
+  plaintext_value         = var.github_token
+}
