@@ -1,5 +1,5 @@
 locals {
-  frontend_image = "${var.region}-docker.pkg.dev/${var.project_name}/${google_artifact_registry_repository.summit_stats_frontend_repo.repository_id}/strava_analyser:${var.frontend_image_tag}"
+  frontend_image = "${var.region}-docker.pkg.dev/${var.project_name}/${google_artifact_registry_repository.summit_stats_frontend_repo.repository_id}/summit-stats-frontend:${var.frontend_image_tag}"
 }
 
 resource "google_cloud_run_v2_service" "frontend" {
