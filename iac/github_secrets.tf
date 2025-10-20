@@ -21,3 +21,33 @@ resource "github_actions_variable" "gcp_region" {
   variable_name = "GCP_REGION"
   value         = var.region
 }
+
+resource "github_actions_secret" "owner_id" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "OWNER_ID"
+  plaintext_value         = var.owner_id
+}
+
+resource "github_actions_secret" "project_id" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "PROJECT_ID"
+  plaintext_value         = var.project_id
+}
+
+resource "github_actions_secret" "project_name" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "PROJECT_NAME"
+  plaintext_value         = var.project_name
+}
+
+resource "github_actions_secret" "client_id" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "CLIENT_ID"
+  plaintext_value         = var.client_id
+}
+
+resource "github_actions_secret" "client_secret" {
+  repository    = split("/", var.github_repo)[1]
+  secret_name = "CLIENT_SECRET"
+  plaintext_value         = var.client_secret
+}
