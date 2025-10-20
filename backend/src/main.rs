@@ -57,6 +57,11 @@ async fn main() {
         .trim()
         .to_string();
     tracing::info!("Got STRAVA_URL...");
+    let frontend_url = std::env::var("FRONTEND_URL")
+        .expect("FRONTEND_URL must be set")
+        .trim()
+        .to_string();
+    tracing::info!("Got FRONTEND_URL...");
     let db_url = format!(
         "postgres://{}:{}@{}:5432/{}",
         std::env::var("DATABASE_USER")
@@ -78,7 +83,7 @@ async fn main() {
     let addr = format!("0.0.0.0:{}", port);
 
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::exact("http://localhost:3000".parse().unwrap()))
+        .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers([CONTENT_TYPE])
         .allow_credentials(true);

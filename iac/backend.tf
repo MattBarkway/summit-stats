@@ -51,7 +51,11 @@ resource "google_cloud_run_v2_service" "backend" {
       }
       env {
         name  = "REDIRECT_URI"
-        value = "http://localhost:8080/auth/strava/callback"
+        value = "https://strava-analyser-backend-uvfmgnanga-ew.a.run.app/auth/strava/callback"
+      }
+      env {
+        name  = "FRONTEND_URL"
+        value = "https://summit-stats-frontend-845129361007.europe-west1.run.app"
       }
 
       env {

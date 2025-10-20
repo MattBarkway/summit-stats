@@ -9,12 +9,15 @@ resource "google_cloud_run_v2_service" "frontend" {
   deletion_protection = false
 
   template {
+    scaling {
+      max_instance_count = 2
+    }
     service_account = google_service_account.cloud_run_sa.email
     containers {
       image = local.frontend_image
 
       env {
-        name  = "API_URL"
+        name  = "NEXT_PUBLIC_API_URL"
         value = google_cloud_run_v2_service.backend.uri
       }
     }
