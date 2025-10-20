@@ -1,7 +1,3 @@
-resource "google_service_account" "github_actions" {
-  account_id   = "github-actions"
-  display_name = "GitHub Actions deployer"
-}
 
 resource "google_iam_workload_identity_pool" "github_pool" {
   workload_identity_pool_id = "github-pool"
@@ -32,6 +28,11 @@ EOT
   }
 }
 
+resource "google_service_account" "github_actions" {
+  account_id   = "github-actions"
+  display_name = "GitHub Actions deployer"
+}
+
 resource "google_service_account_iam_binding" "github_impersonation" {
   service_account_id = "projects/${var.project_name}/serviceAccounts/github-actions@${var.project_name}.iam.gserviceaccount.com"
 
@@ -47,4 +48,17 @@ resource "google_project_iam_member" "artifact_writer" {
   role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
+
+resource "google_project_iam_member" "gcs_storage_admin" {
+  project = var.project_name
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
+resource "google_project_iam_member" "secret_manager_admin" {
+  project = var.project_name
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
 

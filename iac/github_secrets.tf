@@ -1,9 +1,3 @@
-resource "github_actions_secret" "gcp_project_name" {
-  repository = split("/", var.github_repo)[1]
-  secret_name = "GCP_PROJECT_ID"
-  plaintext_value = var.project_name
-}
-
 resource "github_actions_secret" "sa_email" {
   repository = split("/", var.github_repo)[1]
   secret_name = "SERVICE_ACCOUNT_EMAIL"
