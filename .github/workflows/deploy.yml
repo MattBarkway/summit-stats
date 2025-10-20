@@ -80,7 +80,6 @@ jobs:
         working-directory: iac
         run: |
           terraform plan \
-            -auto-approve \
             -var="backend_image_tag=${{ needs.build.outputs.commit_sha }}" \
             -var="frontend_image_tag=${{ needs.build.outputs.commit_sha }}" \
             -var="github_repo=${{ github.repository }}" \
