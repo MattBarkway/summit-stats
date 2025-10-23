@@ -16,6 +16,12 @@ resource "github_actions_variable" "gcp_region" {
   value         = var.region
 }
 
+resource "github_actions_variable" "backend_url" {
+  repository    = split("/", var.github_repo)[1]
+  variable_name = "BACKEND_URL"
+  value         = google_cloud_run_v2_service.backend.uri
+}
+
 resource "github_actions_secret" "owner_id" {
   repository    = split("/", var.github_repo)[1]
   secret_name = "OWNER_ID"

@@ -111,3 +111,10 @@ resource "google_project_iam_member" "cloud_run_sa_roles" {
   role    = each.value
   member  = google_service_account.cloud_run_sa.member
 }
+
+resource "google_cloud_run_service_iam_member" "backend_invoker" {
+  service    = google_cloud_run_v2_service.backend.name
+  location   = var.region
+  role       = "roles/run.invoker"
+  member     = "allUsers"
+}
