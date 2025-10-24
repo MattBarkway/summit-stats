@@ -101,7 +101,8 @@ jobs:
       - name: Apply Terraform with commit SHA
         working-directory: iac/app
         run: |
-          terraform plan \
+          terraform apply \
+            -auto-approve \
             -var="latest_image_tag=${{ needs.build.outputs.commit_sha }}" \
             -var="github_repo=${{ github.repository }}" \
             -var="owner_id=${{ secrets.OWNER_ID }}" \
