@@ -24,6 +24,7 @@ pub struct AppState {
     pub client_id: String,
     pub client_secret: String,
     pub redirect_uri: String,
+    pub frontend_url: String,
 }
 
 #[tokio::main]
@@ -115,6 +116,7 @@ async fn main() {
         client_secret,
         redirect_uri,
         strava_url,
+        frontend_url
     });
 
     let app = routes::routes()
