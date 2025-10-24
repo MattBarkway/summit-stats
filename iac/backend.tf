@@ -48,11 +48,11 @@ resource "google_cloud_run_v2_service" "backend" {
       }
       env {
         name  = "BACKEND_URL"
-        value = "https://strava-analyser-backend-uvfmgnanga-ew.a.run.app"
+        value = "https://api.summit-stats.co.uk"
       }
       env {
         name  = "FRONTEND_URL"
-        value = "https://summit-stats-frontend-845129361007.europe-west1.run.app"
+        value = "https://summit-stats.co.uk"
       }
 
       env {
