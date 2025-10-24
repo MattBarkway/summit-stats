@@ -15,11 +15,6 @@ resource "google_cloud_run_v2_service" "frontend" {
     service_account = google_service_account.cloud_run_sa.email
     containers {
       image = local.frontend_image
-
-      env {
-        name  = "NEXT_PUBLIC_API_URL"
-        value = google_cloud_run_v2_service.backend.uri
-      }
     }
   }
 }
