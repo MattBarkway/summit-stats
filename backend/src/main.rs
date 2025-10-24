@@ -111,12 +111,18 @@ async fn main() {
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
 
+    let backend_domain = Url::parse(&backend_url)
+        .expect("Could not parse BACKEND_URL")
+        .host_str()
+        .expect("No domain found for BACKEND_URL")
+        .to_string();
+
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(true)
         .with_same_site(SameSite::None)
         .with_name("summit_stats_session")
         .with_expiry(Expiry::OnInactivity(Duration::hours(1)))
-        .with_domain(backend_url.clone());
+        .with_domain(backend_domain);
 
     let state = Arc::new(AppState {
         db: pool,
