@@ -95,7 +95,7 @@ jobs:
           terraform_version: 1.13.3
 
       - name: Initialize Terraform
-        working-directory: iac
+        working-directory: iac/app
         run: terraform init
 
       - name: Apply Terraform with commit SHA
