@@ -9,7 +9,7 @@ use tower_http::trace::TraceLayer;
 use tower_sessions::cookie::time::Duration;
 use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
-
+use tower_sessions::cookie::SameSite;
 use tower_sessions_sqlx_store::PostgresStore;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
@@ -107,9 +107,13 @@ async fn main() {
             .clone()
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
+
     let session_layer = SessionManagerLayer::new(session_store)
-        .with_secure(false) // set true once deployed
-        .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
+        .with_secure(true)
+        .with_same_site(SameSite::None)
+        .with_name("summit_stats_session")
+        .with_expiry(Expiry::OnInactivity(Duration::hours(1)))
+        .with_domain("strava-analyser-backend-uvfmgnanga-ew.a.run.app");
 
     let state = Arc::new(AppState {
         db: pool,
