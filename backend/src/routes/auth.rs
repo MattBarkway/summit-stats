@@ -23,7 +23,9 @@ async fn start_oauth(State(state): State<Arc<AppState>>) -> Redirect {
     tracing::info!("Starting OAUTH");
     let url = format!(
         "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read_all,activity:read_all",
-        state.strava_url, state.client_id, format!("{}/auth/strava/callback", state.backend_url)
+        state.strava_url,
+        state.client_id,
+        format!("{}/auth/strava/callback", state.backend_url)
     );
     Redirect::to(&url)
 }

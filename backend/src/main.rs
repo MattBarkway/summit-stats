@@ -1,17 +1,17 @@
+use axum::Error;
 use http::Method;
 use http::header::CONTENT_TYPE;
+use reqwest::Url;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-use axum::Error;
-use reqwest::Url;
 use tokio::signal;
 use tokio::task::AbortHandle;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 use tower_http::trace::TraceLayer;
+use tower_sessions::cookie::SameSite;
 use tower_sessions::cookie::time::Duration;
 use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
-use tower_sessions::cookie::SameSite;
 use tower_sessions_sqlx_store::PostgresStore;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
@@ -33,8 +33,9 @@ pub struct AppState {
 #[tokio::main]
 async fn main() {
     println!("Starting main() — env check");
-    tracing_subscriber::fmt().with_writer(std::io::stdout.with_max_level(tracing::Level::INFO))
-        .init();;
+    tracing_subscriber::fmt()
+        .with_writer(std::io::stdout.with_max_level(tracing::Level::INFO))
+        .init();
     tracing::info!("Starting strava_analyser...");
     for (key, value) in std::env::vars() {
         println!("{}={}", key, value);
@@ -66,9 +67,6 @@ async fn main() {
         .trim()
         .to_string();
     tracing::info!("Got FRONTEND_URL...");
-    let database_name = std::env::var("DATABASE_NAME")
-        .expect("DATABASE_NAME must be set")
-        .trim().to_string();
     let db_url = format!(
         "postgres://{}:{}@{}:5432/{}",
         std::env::var("DATABASE_USER")
@@ -80,7 +78,9 @@ async fn main() {
         std::env::var("DATABASE_HOST")
             .expect("DATABASE_HOST must be set")
             .trim(),
-        &database_name
+        std::env::var("DATABASE_NAME")
+            .expect("DATABASE_NAME must be set")
+            .trim()
     );
     tracing::info!("Got DATABASE_URL...");
 
@@ -100,8 +100,7 @@ async fn main() {
         .expect("Could not connect to database");
 
     let session_store = PostgresStore::new(pool.clone());
-    session_store.clone()
-        .with_schema_name(&database_name).expect("Could not connect to database")
+    session_store
         .migrate()
         .await
         .expect("Could not migrate the database for sessions");
@@ -125,7 +124,7 @@ async fn main() {
         client_secret,
         backend_url,
         strava_url,
-        frontend_url
+        frontend_url,
     });
 
     let app = routes::routes()
