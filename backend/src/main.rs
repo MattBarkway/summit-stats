@@ -5,6 +5,7 @@ use std::sync::Arc;
 use tokio::signal;
 use tokio::task::AbortHandle;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
+use tower_http::trace::TraceLayer;
 use tower_sessions::cookie::time::Duration;
 use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
@@ -122,7 +123,8 @@ async fn main() {
     let app = routes::routes()
         .with_state(state)
         .layer(session_layer)
-        .layer(cors);
+        .layer(cors)
+        .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("Starting server on {}", &addr);
