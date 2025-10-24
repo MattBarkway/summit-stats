@@ -13,6 +13,13 @@ resource "google_artifact_registry_repository" "summit_stats_repo" {
       keep_count = 5
     }
   }
+  cleanup_policies {
+    id     = "delete-over-5"
+    action = "DELETE"
+    condition {
+      older_than   = "1d"
+    }
+  }
 }
 
 resource "google_artifact_registry_repository" "summit_stats_frontend_repo" {
@@ -30,6 +37,13 @@ resource "google_artifact_registry_repository" "summit_stats_frontend_repo" {
       keep_count = 5
     }
   }
+  cleanup_policies {
+    id     = "delete-over-5"
+    action = "DELETE"
+    condition {
+      older_than   = "1d"
+    }
+  }
 }
 
 resource "google_artifact_registry_repository" "summit_stats_migrations_repo" {
@@ -45,6 +59,13 @@ resource "google_artifact_registry_repository" "summit_stats_migrations_repo" {
 
     most_recent_versions {
       keep_count = 5
+    }
+  }
+  cleanup_policies {
+    id     = "delete-over-5"
+    action = "DELETE"
+    condition {
+      older_than   = "1d"
     }
   }
 }

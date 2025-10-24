@@ -23,6 +23,7 @@ async fn my_activities(
     Query(params): Query<ActivitiesQuery>,
     StravaClient { client }: StravaClient,
 ) -> Result<Json<Vec<Activity>>, String> {
+    tracing::info!("Getting activities");
     let page = params.page.unwrap_or(1);
     let per_page = params.per_page.unwrap_or(10);
 
@@ -48,6 +49,7 @@ struct AthleteWithStats {
 async fn athlete_summary(
     StravaClient { client }: StravaClient,
 ) -> Result<Json<AthleteWithStats>, String> {
+    tracing::info!("Getting athlete summary");
     let athlete = client
         .api()
         .athlete()
