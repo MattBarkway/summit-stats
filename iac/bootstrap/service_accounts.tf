@@ -1,3 +1,24 @@
+resource "google_service_account" "cloud_run_sa" {
+  account_id   = "cloud-run-sa"
+  display_name = "Cloud Run Service Account"
+  project = var.project_name
+}
+
+locals {
+  cloud_run_sa_roles = {
+    "cloudsql_client"         = "roles/cloudsql.client"
+    "artifact_reader"         = "roles/artifactregistry.reader"
+    "secret_accessor"         = "roles/secretmanager.secretAccessor"
+  }
+}
+
+resource "google_project_iam_member" "cloud_run_sa_roles" {
+  for_each = local.cloud_run_sa_roles
+
+  project = var.project_id
+  role    = each.value
+  member  = google_service_account.cloud_run_sa.member
+}
 
 resource "google_iam_workload_identity_pool" "github_pool" {
   workload_identity_pool_id = "github-pool"
@@ -62,6 +83,3 @@ resource "google_project_iam_member" "github_actions_roles" {
   role     = each.key
   member   = "serviceAccount:${google_service_account.github_actions.email}"
 }
-
-
-

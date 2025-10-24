@@ -31,13 +31,8 @@ variable "github_token" {
   sensitive   = true
 }
 
-variable "backend_image_tag" {
-  description = "Tag for the latest backend image"
-  type        = string
-}
-
-variable "frontend_image_tag" {
-  description = "Tag for the latest frontend image"
+variable "latest_image_tag" {
+  description = "Tag for the latest images"
   type        = string
 }
 
