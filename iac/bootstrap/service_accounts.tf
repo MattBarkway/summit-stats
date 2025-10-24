@@ -66,14 +66,16 @@ resource "google_service_account_iam_binding" "github_impersonation" {
 
 locals {
   github_actions_roles = [
-    "roles/artifactregistry.writer",          # Push Docker images
-    "roles/storage.objectAdmin",              # Access Terraform state bucket
-    "roles/secretmanager.secretAccessor",     # Read secrets
-    "roles/run.admin",                        # Deploy Cloud Run services
-    "roles/iam.serviceAccountViewer",         # Read service accounts
-    "roles/iam.workloadIdentityPoolViewer",   # Read workload identity pools
-    "roles/compute.viewer",                   # Read Compute resources
-    "roles/vpcaccess.viewer"                  # Read VPC connectors
+    "roles/artifactregistry.writer",
+    "roles/storage.objectAdmin",
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.admin",
+    "roles/run.admin",
+    "roles/iam.serviceAccountViewer",
+    "roles/iam.workloadIdentityPoolViewer",
+    "roles/compute.viewer",
+    "roles/vpcaccess.viewer",
+    "roles/cloudsql.admin",
   ]
 }
 
