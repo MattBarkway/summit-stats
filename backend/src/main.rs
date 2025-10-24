@@ -120,7 +120,7 @@ async fn main() {
         .with_secure(true)
         .with_same_site(SameSite::None)
         .with_name("summit_stats_session")
-        .with_expiry(Expiry::OnInactivity(Duration::hours(1)))
+        .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
 
     let state = Arc::new(AppState {
         db: pool,
