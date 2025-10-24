@@ -40,7 +40,7 @@ jobs:
       - name: Build and Push backend image
         working-directory: backend
         run: |
-          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-repo/strava_analyser"
+          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-backend-repo/summit-stats-backend"
           docker buildx create --use
           docker buildx build \
             --cache-from=type=registry,ref=$IMAGE:buildcache \
