@@ -81,17 +81,11 @@ async fn callback(
     .execute(&state.db)
     .await
     .map_err(|e| e.to_string())?;
-    tracing::info!("Athlete ID: {}", token.athlete.id);
     tracing::info!("Creating session");
     session
         .insert("athlete_id", token.athlete.id)
         .await
         .map_err(|e| e.to_string())?;
-    tracing::info!("Testing session contents");
-
-    let id: Option<i64> = session.get("athlete_id").await.map_err(|e| e.to_string())?;
-    tracing::info!("Inserted id into session, got back {:?}", id);
-
     tracing::info!("Redirecting User");
     Ok(Redirect::to(&format!("{}/dashboard", &state.frontend_url)))
 }
