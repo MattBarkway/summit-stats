@@ -11,6 +11,7 @@ pub fn routes() -> Router<Arc<AppState>> {
 }
 
 async fn me(StravaClient { client }: StravaClient) -> Result<Json<DetailedAthlete>, String> {
+    tracing::info!("Getting athlete");
     let athlete = client
         .api()
         .athlete()

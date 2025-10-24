@@ -1,7 +1,3 @@
-resource "google_service_account" "github_actions" {
-  account_id   = "github-actions"
-  display_name = "GitHub Actions deployer"
-}
 
 resource "google_iam_workload_identity_pool" "github_pool" {
   workload_identity_pool_id = "github-pool"
@@ -32,6 +28,11 @@ EOT
   }
 }
 
+resource "google_service_account" "github_actions" {
+  account_id   = "github-actions"
+  display_name = "GitHub Actions deployer"
+}
+
 resource "google_service_account_iam_binding" "github_impersonation" {
   service_account_id = "projects/${var.project_name}/serviceAccounts/github-actions@${var.project_name}.iam.gserviceaccount.com"
 
@@ -42,9 +43,25 @@ resource "google_service_account_iam_binding" "github_impersonation" {
   ]
 }
 
-resource "google_project_iam_member" "artifact_writer" {
-  project = var.project_name
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.github_actions.email}"
+locals {
+  github_actions_roles = [
+    "roles/artifactregistry.writer",          # Push Docker images
+    "roles/storage.objectAdmin",              # Access Terraform state bucket
+    "roles/secretmanager.secretAccessor",     # Read secrets
+    "roles/run.admin",                        # Deploy Cloud Run services
+    "roles/iam.serviceAccountViewer",         # Read service accounts
+    "roles/iam.workloadIdentityPoolViewer",   # Read workload identity pools
+    "roles/compute.viewer",                   # Read Compute resources
+    "roles/vpcaccess.viewer"                  # Read VPC connectors
+  ]
 }
+
+resource "google_project_iam_member" "github_actions_roles" {
+  for_each = toset(local.github_actions_roles)
+  project  = var.project_name
+  role     = each.key
+  member   = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
+
 

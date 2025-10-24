@@ -24,13 +24,12 @@ where
                     "failed to extract session",
                 )
             })?;
-
         let athlete_id: i64 = session
             .get("athlete_id")
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, "whoops"))?
             .ok_or((StatusCode::UNAUTHORIZED, "Unauthorized"))?;
-
+        tracing::info!("Found athlete");
         Ok(CurrentUser { athlete_id })
     }
 }

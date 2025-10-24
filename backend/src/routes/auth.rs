@@ -20,9 +20,12 @@ pub fn routes() -> Router<Arc<AppState>> {
 }
 
 async fn start_oauth(State(state): State<Arc<AppState>>) -> Redirect {
+    tracing::info!("Starting OAUTH");
     let url = format!(
         "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read_all,activity:read_all",
-        state.strava_url, state.client_id, state.redirect_uri
+        state.strava_url,
+        state.client_id,
+        format!("{}/auth/strava/callback", state.backend_url)
     );
     Redirect::to(&url)
 }
@@ -38,6 +41,7 @@ async fn callback(
     Query(params): Query<CallbackQuery>,
     mut session: Session,
 ) -> Result<Redirect, String> {
+    tracing::info!("Received OAUTH callback");
     let client = Client::new();
 
     let mut form = HashMap::new();
@@ -59,6 +63,7 @@ async fn callback(
 
     let token: TokenResponse = res.json().await.map_err(|e| e.to_string())?;
 
+    tracing::info!("Creating athlete record");
     sqlx::query!(
         r#"
         INSERT INTO tokens (athlete_id, access_token, refresh_token, expires_at)
@@ -76,11 +81,11 @@ async fn callback(
     .execute(&state.db)
     .await
     .map_err(|e| e.to_string())?;
-
+    tracing::info!("Creating session");
     session
         .insert("athlete_id", token.athlete.id)
         .await
         .map_err(|e| e.to_string())?;
-
-    Ok(Redirect::to("http://localhost:3000/dashboard"))
+    tracing::info!("Redirecting User");
+    Ok(Redirect::to(&format!("{}/dashboard", &state.frontend_url)))
 }

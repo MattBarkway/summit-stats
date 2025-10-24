@@ -36,6 +36,11 @@ variable "backend_image_tag" {
   type        = string
 }
 
+variable "frontend_image_tag" {
+  description = "Tag for the latest frontend image"
+  type        = string
+}
+
 variable "client_id" {
   description = "Strava client ID"
   type        = string

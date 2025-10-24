@@ -1,14 +1,17 @@
+use axum::Error;
 use http::Method;
 use http::header::CONTENT_TYPE;
+use reqwest::Url;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use tokio::signal;
 use tokio::task::AbortHandle;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
+use tower_http::trace::TraceLayer;
+use tower_sessions::cookie::SameSite;
 use tower_sessions::cookie::time::Duration;
 use tower_sessions::session_store::ExpiredDeletion;
 use tower_sessions::{Expiry, SessionManagerLayer};
-
 use tower_sessions_sqlx_store::PostgresStore;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
@@ -23,14 +26,16 @@ pub struct AppState {
     pub strava_url: String,
     pub client_id: String,
     pub client_secret: String,
-    pub redirect_uri: String,
+    pub backend_url: String,
+    pub frontend_url: String,
 }
 
 #[tokio::main]
 async fn main() {
     println!("Starting main() — env check");
-    tracing_subscriber::fmt().with_writer(std::io::stdout.with_max_level(tracing::Level::INFO))
-        .init();;
+    tracing_subscriber::fmt()
+        .with_writer(std::io::stdout.with_max_level(tracing::Level::INFO))
+        .init();
     tracing::info!("Starting strava_analyser...");
     for (key, value) in std::env::vars() {
         println!("{}={}", key, value);
@@ -47,16 +52,21 @@ async fn main() {
         .trim()
         .to_string();
     tracing::info!("Got CLIENT_SECRET...");
-    let redirect_uri = std::env::var("REDIRECT_URI")
-        .expect("REDIRECT_URI must be set")
+    let backend_url = std::env::var("BACKEND_URL")
+        .expect("BACKEND_URL must be set")
         .trim()
         .to_string();
-    tracing::info!("Got REDIRECT_URI...");
+    tracing::info!("Got BACKEND_URL...");
     let strava_url = std::env::var("STRAVA_URL")
         .expect("STRAVA_URL must be set")
         .trim()
         .to_string();
     tracing::info!("Got STRAVA_URL...");
+    let frontend_url = std::env::var("FRONTEND_URL")
+        .expect("FRONTEND_URL must be set")
+        .trim()
+        .to_string();
+    tracing::info!("Got FRONTEND_URL...");
     let db_url = format!(
         "postgres://{}:{}@{}:5432/{}",
         std::env::var("DATABASE_USER")
@@ -78,7 +88,7 @@ async fn main() {
     let addr = format!("0.0.0.0:{}", port);
 
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::exact("http://localhost:3000".parse().unwrap()))
+        .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers([CONTENT_TYPE])
         .allow_credentials(true);
@@ -100,22 +110,28 @@ async fn main() {
             .clone()
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
+
     let session_layer = SessionManagerLayer::new(session_store)
-        .with_secure(false) // set true once deployed
+        .with_secure(true)
+        .with_same_site(SameSite::None)
+        .with_name("summit_stats_session")
+        .with_domain(".summit-stats.co.uk")
         .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
 
     let state = Arc::new(AppState {
         db: pool,
         client_id,
         client_secret,
-        redirect_uri,
+        backend_url,
         strava_url,
+        frontend_url,
     });
 
     let app = routes::routes()
         .with_state(state)
         .layer(session_layer)
-        .layer(cors);
+        .layer(cors)
+        .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("Starting server on {}", &addr);

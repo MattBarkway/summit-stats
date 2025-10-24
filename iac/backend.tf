@@ -11,17 +11,12 @@ locals {
   backend_image = "${var.region}-docker.pkg.dev/${var.project_name}/${google_artifact_registry_repository.summit_stats_repo.repository_id}/strava_analyser:${var.backend_image_tag}"
 }
 
-output "backend_url" {
-  value = google_cloud_run_v2_service.backend.uri
-}
-# ----------------------------
-# Cloud Run backend service
-# ----------------------------
 resource "google_cloud_run_v2_service" "backend" {
   name     = "strava-analyser-backend"
   location = var.region
   project  = var.project_name
   deletion_protection = false
+
   template {
     service_account = google_service_account.cloud_run_sa.email
     containers {
@@ -52,8 +47,12 @@ resource "google_cloud_run_v2_service" "backend" {
         value = "https://www.strava.com"
       }
       env {
-        name  = "REDIRECT_URI"
-        value = "http://localhost:8080/auth/strava/callback"
+        name  = "BACKEND_URL"
+        value = "https://api.summit-stats.co.uk"
+      }
+      env {
+        name  = "FRONTEND_URL"
+        value = "https://summit-stats.co.uk"
       }
 
       env {
@@ -109,3 +108,14 @@ resource "google_project_iam_member" "cloud_run_sa_roles" {
   role    = each.value
   member  = google_service_account.cloud_run_sa.member
 }
+
+resource "google_cloud_run_v2_service_iam_member" "backend_invoker" {
+  project = var.project_name
+  location = var.region
+  name     = google_cloud_run_v2_service.backend.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+
+  depends_on = [google_cloud_run_v2_service.backend]
+}
+
