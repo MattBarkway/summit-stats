@@ -37,28 +37,28 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
 
-#      - name: Build and Push backend image
-#        working-directory: backend
-#        run: |
-#          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-repo/strava_analyser"
-#          docker buildx create --use
-#          docker buildx build \
-#            --cache-from=type=registry,ref=$IMAGE:buildcache \
-#            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
-#            -t "$IMAGE:${{ github.sha }}" \
-#            --push .
-#
-#      - name: Build and Push frontend image
-#        working-directory: frontend
-#        run: |
-#          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-frontend-repo/summit-stats-frontend"
-#          docker buildx create --use
-#          docker buildx build \
-#            --build-arg NEXT_PUBLIC_API_URL="${{ vars.BACKEND_URL }}" \
-#            --cache-from=type=registry,ref=$IMAGE:buildcache \
-#            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
-#            -t "$IMAGE:${{ github.sha }}" \
-#            --push .
+      - name: Build and Push backend image
+        working-directory: backend
+        run: |
+          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-repo/strava_analyser"
+          docker buildx create --use
+          docker buildx build \
+            --cache-from=type=registry,ref=$IMAGE:buildcache \
+            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
+            -t "$IMAGE:${{ github.sha }}" \
+            --push .
+
+      - name: Build and Push frontend image
+        working-directory: frontend
+        run: |
+          IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.PROJECT_NAME }}/summit-stats-frontend-repo/summit-stats-frontend"
+          docker buildx create --use
+          docker buildx build \
+            --build-arg NEXT_PUBLIC_API_URL="${{ vars.BACKEND_URL }}" \
+            --cache-from=type=registry,ref=$IMAGE:buildcache \
+            --cache-to=type=registry,ref=$IMAGE:buildcache,mode=max \
+            -t "$IMAGE:${{ github.sha }}" \
+            --push .
 
       - name: Build and Push migrations image
         working-directory: backend

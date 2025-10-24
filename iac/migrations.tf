@@ -1,8 +1,12 @@
+locals {
+  migrations_image = "${var.region}-docker.pkg.dev/${var.project_name}/${google_artifact_registry_repository.summit_stats_migrations_repo.repository_id}/summit-stats-migrations:${var.backend_image_tag}"
+}
+
 resource "google_cloud_run_v2_job" "db_migrate" {
   name     = "db-migrate"
   location = var.region
   project  = var.project_name
-
+  deletion_protection = false
   template {
     template {
       service_account = google_service_account.cloud_run_sa.email
@@ -11,7 +15,7 @@ resource "google_cloud_run_v2_job" "db_migrate" {
         egress    = "ALL_TRAFFIC"
       }
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_name}/summit-stats-repo/db_migrate:${var.backend_image_tag}"
+        image = local.migrations_image
         env {
           name  = "DATABASE_USER"
           value = google_sql_user.default.name
