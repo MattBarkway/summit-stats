@@ -47,8 +47,8 @@ resource "google_cloud_run_v2_service" "backend" {
         value = "https://www.strava.com"
       }
       env {
-        name  = "REDIRECT_URI"
-        value = "https://strava-analyser-backend-uvfmgnanga-ew.a.run.app/auth/strava/callback"
+        name  = "BACKEND_URL"
+        value = "https://strava-analyser-backend-uvfmgnanga-ew.a.run.app"
       }
       env {
         name  = "FRONTEND_URL"

@@ -2,6 +2,8 @@ use http::Method;
 use http::header::CONTENT_TYPE;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
+use axum::Error;
+use reqwest::Url;
 use tokio::signal;
 use tokio::task::AbortHandle;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
@@ -24,7 +26,7 @@ pub struct AppState {
     pub strava_url: String,
     pub client_id: String,
     pub client_secret: String,
-    pub redirect_uri: String,
+    pub backend_url: String,
     pub frontend_url: String,
 }
 
@@ -49,11 +51,11 @@ async fn main() {
         .trim()
         .to_string();
     tracing::info!("Got CLIENT_SECRET...");
-    let redirect_uri = std::env::var("REDIRECT_URI")
-        .expect("REDIRECT_URI must be set")
+    let backend_url = std::env::var("BACKEND_URL")
+        .expect("BACKEND_URL must be set")
         .trim()
         .to_string();
-    tracing::info!("Got REDIRECT_URI...");
+    tracing::info!("Got BACKEND_URL...");
     let strava_url = std::env::var("STRAVA_URL")
         .expect("STRAVA_URL must be set")
         .trim()
@@ -108,18 +110,24 @@ async fn main() {
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
 
+    let backend_domain = Url::parse(&backend_url)
+        .expect("Could not parse BACKEND_URL")
+        .host_str()
+        .expect("No domain found for BACKEND_URL")
+        .to_string();
+
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(true)
         .with_same_site(SameSite::None)
         .with_name("summit_stats_session")
         .with_expiry(Expiry::OnInactivity(Duration::hours(1)))
-        .with_domain("strava-analyser-backend-uvfmgnanga-ew.a.run.app");
+        .with_domain(backend_domain);
 
     let state = Arc::new(AppState {
         db: pool,
         client_id,
         client_secret,
-        redirect_uri,
+        backend_url,
         strava_url,
         frontend_url
     });
