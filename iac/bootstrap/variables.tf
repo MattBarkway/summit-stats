@@ -29,20 +29,3 @@ variable "github_token" {
   type        = string
   sensitive   = true
 }
-#
-# variable "latest_image_tag" {
-#   description = "Tag for the latest images"
-#   type        = string
-# }
-#
-# variable "client_id" {
-#   description = "Strava client ID"
-#   type        = string
-#   sensitive   = true
-# }
-#
-# variable "client_secret" {
-#   description = "Strava client secret"
-#   type        = string
-#   sensitive   = true
-# }

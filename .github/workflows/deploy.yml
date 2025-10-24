@@ -99,11 +99,10 @@ jobs:
         run: terraform init
 
       - name: Apply Terraform with commit SHA
-        working-directory: iac
+        working-directory: iac/app
         run: |
           terraform plan \
-            -var="backend_image_tag=${{ needs.build.outputs.commit_sha }}" \
-            -var="frontend_image_tag=${{ needs.build.outputs.commit_sha }}" \
+            -var="latest_image_tag=${{ needs.build.outputs.commit_sha }}" \
             -var="github_repo=${{ github.repository }}" \
             -var="owner_id=${{ secrets.OWNER_ID }}" \
             -var="project_id=${{ secrets.PROJECT_ID }}" \
