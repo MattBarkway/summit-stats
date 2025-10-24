@@ -85,3 +85,9 @@ resource "google_project_iam_member" "github_actions_roles" {
   role     = each.key
   member   = "serviceAccount:${google_service_account.github_actions.email}"
 }
+
+resource "google_service_account_iam_member" "github_actions_act_as_cloud_run_sa" {
+  service_account_id = google_service_account.cloud_run_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.github_actions.email}"
+}
