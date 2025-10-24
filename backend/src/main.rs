@@ -116,7 +116,7 @@ async fn main() {
         .with_same_site(SameSite::None)
         .with_name("summit_stats_session")
         .with_expiry(Expiry::OnInactivity(Duration::hours(1)))
-        .with_domain(".run.app");
+        .with_domain(backend_url.clone());
 
     let state = Arc::new(AppState {
         db: pool,
