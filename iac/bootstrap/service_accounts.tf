@@ -89,8 +89,5 @@ resource "google_project_iam_member" "github_actions_roles" {
 resource "google_service_account_iam_member" "github_actions_act_as_cloud_run_sa" {
   service_account_id = google_service_account.cloud_run_sa.name
   role               = "roles/iam.serviceAccountUser"
-  member             = "principalSet://iam.googleapis.com/projects/${var.project_id}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github_pool.workload_identity_pool_id}/attribute.repository/${var.github_repo}"
+  member             = "serviceAccount:${google_service_account.github_actions.email}"
 }
-
-
-
