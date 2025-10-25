@@ -1,3 +1,24 @@
+resource "google_service_account" "cloud_run_sa" {
+  account_id   = "cloud-run-sa"
+  display_name = "Cloud Run Service Account"
+  project = var.project_name
+}
+
+locals {
+  cloud_run_sa_roles = {
+    "cloudsql_client"         = "roles/cloudsql.client"
+    "artifact_reader"         = "roles/artifactregistry.reader"
+    "secret_accessor"         = "roles/secretmanager.secretAccessor"
+  }
+}
+
+resource "google_project_iam_member" "cloud_run_sa_roles" {
+  for_each = local.cloud_run_sa_roles
+
+  project = var.project_id
+  role    = each.value
+  member  = google_service_account.cloud_run_sa.member
+}
 
 resource "google_iam_workload_identity_pool" "github_pool" {
   workload_identity_pool_id = "github-pool"
@@ -45,14 +66,16 @@ resource "google_service_account_iam_binding" "github_impersonation" {
 
 locals {
   github_actions_roles = [
-    "roles/artifactregistry.writer",          # Push Docker images
-    "roles/storage.objectAdmin",              # Access Terraform state bucket
-    "roles/secretmanager.secretAccessor",     # Read secrets
-    "roles/run.admin",                        # Deploy Cloud Run services
-    "roles/iam.serviceAccountViewer",         # Read service accounts
-    "roles/iam.workloadIdentityPoolViewer",   # Read workload identity pools
-    "roles/compute.viewer",                   # Read Compute resources
-    "roles/vpcaccess.viewer"                  # Read VPC connectors
+    "roles/artifactregistry.writer",
+    "roles/storage.objectAdmin",
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.admin",
+    "roles/run.admin",
+    "roles/iam.serviceAccountViewer",
+    "roles/iam.workloadIdentityPoolViewer",
+    "roles/compute.viewer",
+    "roles/vpcaccess.viewer",
+    "roles/cloudsql.admin",
   ]
 }
 
@@ -63,5 +86,8 @@ resource "google_project_iam_member" "github_actions_roles" {
   member   = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-
-
+resource "google_service_account_iam_member" "github_actions_act_as_cloud_run_sa" {
+  service_account_id = google_service_account.cloud_run_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.github_actions.email}"
+}
