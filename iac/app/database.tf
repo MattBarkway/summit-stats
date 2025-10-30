@@ -9,7 +9,7 @@ resource "random_password" "db_password" {
 
 resource "google_sql_database_instance" "postgres" {
   name             = "strava-backend-db"
-  database_version = "POSTGRES_17"
+  database_version = "POSTGRES_15"
   region           = var.region
   project = var.project_name
 
