@@ -83,29 +83,29 @@ export default function CyclePill({
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-sm px-3 py-1 ${
+      className={`inline-flex items-center gap-2 rounded-full bg-white/5 backdrop-blur-sm ring-1 ring-white/10 px-3 py-1 ${
         compact ? "text-xs" : "text-sm"
-      } text-gray-800`}
+      } text-slate-200`}
     >
       <Calendar
         size={compact ? 12 : 14}
         strokeWidth={2.5}
-        className="text-[#3e7f6b] shrink-0"
+        className="text-orange-400 shrink-0"
         aria-hidden="true"
       />
-      <span className="font-medium">{label}</span>
+      <span className="font-medium tracking-tight">{label}</span>
       {left && (
         <>
-          <span className="text-gray-500">·</span>
-          <span className="text-gray-700">{left}</span>
+          <span className="text-slate-500">·</span>
+          <span className="text-slate-300 tabular-nums">{left}</span>
         </>
       )}
       {cycle_type !== "all_time" && (
         <span
-          className={`${compact ? "w-12" : "w-16"} h-1.5 rounded-full bg-white/60 overflow-hidden`}
+          className={`${compact ? "w-12" : "w-16"} h-1.5 rounded-full bg-white/10 overflow-hidden`}
         >
           <span
-            className="block h-full bg-[#3e7f6b]"
+            className="block h-full bg-cyan-400"
             style={{ width: `${pct * 100}%` }}
           />
         </span>

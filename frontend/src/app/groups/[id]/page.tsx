@@ -77,14 +77,14 @@ export default function GroupDetailPage({
 
   if (groupLoading) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5 fade-up">
         <HeaderSkeleton />
       </main>
     );
   }
   if (error) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5 fade-up">
         <ErrorState
           title="Couldn't load this group"
           message={(error as Error).message}
@@ -113,21 +113,21 @@ export default function GroupDetailPage({
   const totalActivities = entries.reduce((sum, e) => sum + e.activity_count, 0);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5">
-      <header className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
+    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5 fade-up">
+      <header className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <GroupIcon group={group} size={56} />
+            <GroupIcon group={group} size={64} />
             <div className="min-w-0">
-              <h1 className="text-3xl font-semibold text-gray-900 truncate">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100 truncate">
                 {group.name}
               </h1>
               {group.description && (
-                <p className="mt-1 text-gray-700 line-clamp-1">
+                <p className="mt-1 text-slate-300 line-clamp-1">
                   {group.description}
                 </p>
               )}
-              <p className="mt-2 text-xs text-gray-600">
+              <p className="mt-2 text-xs text-slate-400 tabular-nums">
                 {group.members.length} member
                 {group.members.length === 1 ? "" : "s"} · {totalActivities}{" "}
                 activit
@@ -143,7 +143,7 @@ export default function GroupDetailPage({
               <button
                 type="button"
                 onClick={() => setEditOpen(true)}
-                className="rounded-lg border border-gray-300 bg-white/40 px-3 py-1.5 text-sm text-gray-700 hover:bg-white/70"
+                className="rounded-lg ring-1 ring-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10"
               >
                 Edit
               </button>
@@ -153,7 +153,7 @@ export default function GroupDetailPage({
                 type="button"
                 onClick={handleDelete}
                 disabled={remove.isPending}
-                className="rounded-lg border border-red-300 bg-white/40 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+                className="rounded-lg ring-1 ring-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-300 hover:bg-red-500/20 disabled:opacity-50"
               >
                 Delete
               </button>
@@ -162,7 +162,7 @@ export default function GroupDetailPage({
                 type="button"
                 onClick={handleLeave}
                 disabled={leave.isPending}
-                className="rounded-lg border border-gray-300 bg-white/40 px-3 py-1.5 text-sm text-gray-700 hover:bg-white/70 disabled:opacity-50"
+                className="rounded-lg ring-1 ring-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10 disabled:opacity-50"
               >
                 Leave
               </button>
@@ -195,18 +195,20 @@ export default function GroupDetailPage({
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             {leaderboard && leaderboard.cycle_type !== "all_time" && (
-              <p className="text-sm text-gray-700">
-                {cycleLabel(
-                  leaderboard.cycle_type,
-                  leaderboard.cycle_start,
-                  leaderboard.cycle_end,
-                )}{" "}
+              <p className="text-sm text-slate-300">
+                <span className="font-semibold text-slate-100">
+                  {cycleLabel(
+                    leaderboard.cycle_type,
+                    leaderboard.cycle_start,
+                    leaderboard.cycle_end,
+                  )}
+                </span>{" "}
                 standings
                 {!cycleOverride && (
                   <>
                     {" "}
                     ·{" "}
-                    <span className="text-gray-600">
+                    <span className="text-slate-400 tabular-nums">
                       {timeLeft(leaderboard.cycle_end)}
                     </span>
                   </>
@@ -253,18 +255,18 @@ export default function GroupDetailPage({
       {tab === "info" && (
         <section className="space-y-5">
           {group.description && (
-            <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5">
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
+            <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
                 About
               </h3>
-              <p className="text-gray-800 whitespace-pre-wrap">
+              <p className="text-slate-200 whitespace-pre-wrap">
                 {group.description}
               </p>
             </div>
           )}
 
-          <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
+          <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
               Invite a friend
             </h3>
             <InviteLinkDisplay
@@ -273,8 +275,8 @@ export default function GroupDetailPage({
             />
           </div>
 
-          <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-600">
+          <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
               Members ({group.members.length})
             </h3>
             <ul className="space-y-2">
@@ -285,21 +287,21 @@ export default function GroupDetailPage({
                 return (
                   <li
                     key={m.athlete_id}
-                    className="flex items-center gap-3 rounded-xl bg-white/30 px-3 py-2"
+                    className="flex items-center gap-3 rounded-xl bg-white/5 ring-1 ring-white/5 px-3 py-2"
                   >
                     {m.profile_url ? (
                       // biome-ignore lint/performance/noImgElement: Strava-hosted avatar URL, not a static asset
                       <img
                         src={m.profile_url}
                         alt={name}
-                        className="h-8 w-8 rounded-full object-cover ring-1 ring-white/40"
+                        className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-white/40" />
+                      <div className="h-8 w-8 rounded-full bg-white/10" />
                     )}
-                    <span>{name}</span>
+                    <span className="text-slate-200">{name}</span>
                     {m.athlete_id === group.owner_id && (
-                      <span className="ml-auto rounded-full bg-[#3e7f6b]/20 px-2 py-0.5 text-xs font-medium text-[#3e7f6b]">
+                      <span className="ml-auto rounded-full bg-orange-400/15 ring-1 ring-orange-400/30 px-2 py-0.5 text-xs font-medium text-orange-300">
                         Owner
                       </span>
                     )}
@@ -326,6 +328,11 @@ function Podium({
   }[];
 }) {
   const medals = ["🥇", "🥈", "🥉"];
+  const tints = [
+    "ring-amber-400/60 bg-amber-500/10",
+    "ring-slate-300/40 bg-slate-300/5",
+    "ring-orange-400/40 bg-orange-500/10",
+  ];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {entries.map((e, i) => {
@@ -335,7 +342,7 @@ function Podium({
         return (
           <div
             key={e.athlete_id}
-            className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-4 flex items-center gap-3"
+            className={`rounded-2xl backdrop-blur-xl ring-1 shadow-md p-4 flex items-center gap-3 ${tints[i]}`}
           >
             <span className="text-2xl">{medals[i]}</span>
             {e.profile_url ? (
@@ -343,14 +350,14 @@ function Podium({
               <img
                 src={e.profile_url}
                 alt={name}
-                className="h-10 w-10 rounded-full object-cover ring-1 ring-white/40"
+                className="h-10 w-10 rounded-full object-cover ring-1 ring-white/20"
               />
             ) : (
-              <div className="h-10 w-10 rounded-full bg-white/40" />
+              <div className="h-10 w-10 rounded-full bg-white/10" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-gray-900 truncate">{name}</p>
-              <p className="text-sm text-[#3e7f6b] font-semibold">
+              <p className="font-bold text-slate-100 truncate">{name}</p>
+              <p className="text-sm text-orange-300 font-bold tabular-nums">
                 {e.points.toLocaleString()} pts
               </p>
             </div>

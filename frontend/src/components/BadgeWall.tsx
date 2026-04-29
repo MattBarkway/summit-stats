@@ -43,7 +43,7 @@ function tooltip(b: BadgeSummary): string {
 
 export default function BadgeWall({ badges }: { badges: BadgeSummary[] }) {
   if (!badges || badges.length === 0) {
-    return <p className="text-sm text-gray-600">No badges earned yet.</p>;
+    return <p className="text-sm text-slate-400">No badges earned yet.</p>;
   }
 
   return (
@@ -54,15 +54,17 @@ export default function BadgeWall({ badges }: { badges: BadgeSummary[] }) {
           <li
             key={`${b.slug}-${b.awarded_at}`}
             title={tooltip(b)}
-            className="inline-flex items-center gap-2 rounded-full bg-white/40 backdrop-blur-sm px-3 py-1.5 shadow-sm ring-1 ring-white/40"
+            className="inline-flex items-center gap-2 rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1.5 shadow-sm"
           >
             <Icon
               size={16}
               strokeWidth={2.5}
-              className="text-[#3e7f6b]"
+              className="text-orange-400 drop-shadow-[0_0_4px_rgba(251,146,60,0.5)]"
               aria-hidden="true"
             />
-            <span className="text-sm font-medium text-gray-800">{b.name}</span>
+            <span className="text-sm font-semibold text-slate-100">
+              {b.name}
+            </span>
           </li>
         );
       })}

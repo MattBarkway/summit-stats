@@ -31,6 +31,9 @@ const SPORTS = [
   "TrailRun",
 ];
 
+const inputCls =
+  "w-full rounded-md p-3 bg-white/5 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400 text-slate-100 disabled:opacity-60";
+
 export default function RuleEditor({
   groupId,
   open,
@@ -85,16 +88,16 @@ export default function RuleEditor({
   const isPending = create.isPending || update.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/40 backdrop-blur-xl shadow-xl p-6">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md rounded-2xl bg-slate-900/80 ring-1 ring-white/10 backdrop-blur-xl shadow-2xl shadow-black/50 p-6">
+        <h2 className="mb-4 text-xl font-bold tracking-tight text-slate-100">
           {editing ? "Edit rule" : "Add rule"}
         </h2>
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label
               htmlFor="rule-trigger"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-slate-300"
             >
               Trigger
             </label>
@@ -103,10 +106,10 @@ export default function RuleEditor({
               disabled={editing}
               value={trigger}
               onChange={(e) => setTrigger(e.target.value as RuleTrigger)}
-              className="w-full rounded-md p-3 bg-gray-100/60 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#558d73] text-gray-700 disabled:opacity-60"
+              className={inputCls}
             >
               {TRIGGERS.map((t) => (
-                <option key={t.id} value={t.id}>
+                <option key={t.id} value={t.id} className="bg-slate-900">
                   {t.label}
                 </option>
               ))}
@@ -117,7 +120,7 @@ export default function RuleEditor({
             <div>
               <label
                 htmlFor="rule-sport"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-slate-300"
               >
                 Sport
               </label>
@@ -125,10 +128,10 @@ export default function RuleEditor({
                 id="rule-sport"
                 value={sport}
                 onChange={(e) => setSport(e.target.value)}
-                className="w-full rounded-md p-3 bg-gray-100/60 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#558d73] text-gray-700"
+                className={inputCls}
               >
                 {SPORTS.map((s) => (
-                  <option key={s} value={s}>
+                  <option key={s} value={s} className="bg-slate-900">
                     {s || "Any sport"}
                   </option>
                 ))}
@@ -140,7 +143,7 @@ export default function RuleEditor({
             <div>
               <label
                 htmlFor="rule-threshold"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-slate-300"
               >
                 Threshold
               </label>
@@ -152,7 +155,7 @@ export default function RuleEditor({
                 min="0"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                className="w-full rounded-md p-3 bg-gray-100/60 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#558d73] text-gray-700"
+                className={inputCls}
               />
             </div>
           )}
@@ -160,7 +163,7 @@ export default function RuleEditor({
           <div>
             <label
               htmlFor="rule-points"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-slate-300"
             >
               Points
             </label>
@@ -171,7 +174,7 @@ export default function RuleEditor({
               min="0"
               value={points}
               onChange={(e) => setPoints(e.target.value)}
-              className="w-full rounded-md p-3 bg-gray-100/60 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#558d73] text-gray-700"
+              className={inputCls}
             />
           </div>
 
@@ -181,14 +184,14 @@ export default function RuleEditor({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-300 bg-white/40 px-4 py-2 text-gray-700 hover:bg-white/70 transition-colors"
+              className="rounded-lg ring-1 ring-white/10 bg-white/5 px-4 py-2 text-slate-200 hover:bg-white/10 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-[#3e7f6b]/80 px-4 py-2 text-white hover:bg-[#358d73] disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-orange-400 px-4 py-2 text-slate-950 font-bold hover:bg-orange-500 disabled:opacity-50 transition-colors"
             >
               {isPending ? "Saving…" : editing ? "Save" : "Add"}
             </button>

@@ -15,8 +15,10 @@ use tower_sessions::{Expiry, SessionManagerLayer};
 use tower_sessions_sqlx_store::PostgresStore;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
+pub mod errors;
 pub mod extractors;
 pub mod models;
+pub mod repository;
 pub mod routes;
 pub mod services;
 pub mod utilities;

@@ -24,7 +24,7 @@ export default function ActivityDetailPage({
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6 fade-up">
         <HeaderSkeleton />
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -32,7 +32,7 @@ export default function ActivityDetailPage({
             <StatBoxSkeleton key={`stat-skel-${i}`} />
           ))}
         </section>
-        <section className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-3">
+        <section className="rounded-2xl bg-white/5 ring-1 ring-white/10 backdrop-blur-xl shadow-xl p-3">
           <SkeletonLine width="100%" height="24rem" />
         </section>
       </main>
@@ -40,7 +40,7 @@ export default function ActivityDetailPage({
   }
   if (error) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 fade-up">
         <ErrorState
           title="Couldn't load this activity"
           message={(error as Error).message}
@@ -55,13 +55,15 @@ export default function ActivityDetailPage({
   const points = streams.latlng?.data ?? [];
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6">
-      <header className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
-        <h1 className="text-3xl font-semibold text-gray-900">
+    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6 fade-up">
+      <header className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-6">
+        <p className="text-xs uppercase tracking-widest text-orange-300">
+          {activity.sport_type}
+        </p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100">
           {activity.name}
         </h1>
-        <p className="mt-1 text-gray-700">
-          {activity.sport_type} ·{" "}
+        <p className="mt-1 text-sm text-slate-400">
           {new Date(activity.start_date).toLocaleString()}
         </p>
       </header>
@@ -83,7 +85,7 @@ export default function ActivityDetailPage({
       </section>
 
       {points.length > 0 && (
-        <section className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-3">
+        <section className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-2">
           <ActivityMap points={points} />
         </section>
       )}
@@ -93,9 +95,13 @@ export default function ActivityDetailPage({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-4 text-center">
-      <p className="text-xs uppercase tracking-wide text-gray-600">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-gray-900">{value}</p>
+    <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-4 text-center">
+      <p className="text-xs uppercase tracking-widest text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-xl font-extrabold tabular-nums tracking-tight text-slate-100 font-mono">
+        {value}
+      </p>
     </div>
   );
 }

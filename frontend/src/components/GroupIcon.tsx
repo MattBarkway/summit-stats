@@ -1,17 +1,17 @@
 "use client";
 
-// Curated palette: glass-friendly mid-tones that read well on the gradient bg.
+// Saturated palette tuned for dark backgrounds — deterministic per group id.
 const PALETTE = [
-  "#3e7f6b", // sage
-  "#558d73", // teal-sage
-  "#87768e", // mauve
-  "#ab97af", // lavender
-  "#a85d51", // terracotta
-  "#7d8a4f", // olive
-  "#5d7e9c", // dusty blue
-  "#a07b3d", // ochre
-  "#8e5b7e", // plum
-  "#4d8b8b", // teal
+  "#fb923c", // orange
+  "#22d3ee", // cyan
+  "#a78bfa", // violet
+  "#f472b6", // pink
+  "#34d399", // emerald
+  "#facc15", // amber
+  "#60a5fa", // blue
+  "#f87171", // red
+  "#c084fc", // purple
+  "#2dd4bf", // teal
 ];
 
 function hashString(s: string): number {
@@ -45,7 +45,7 @@ export default function GroupIcon({ group, size = 40, className = "" }: Props) {
         alt={group.name}
         width={size}
         height={size}
-        className={`rounded-full object-cover ring-2 ring-white/50 shadow-sm ${className}`}
+        className={`rounded-full object-cover ring-2 ring-white/20 shadow-lg shadow-black/30 ${className}`}
         style={{ width: size, height: size }}
       />
     );
@@ -58,7 +58,7 @@ export default function GroupIcon({ group, size = 40, className = "" }: Props) {
   return (
     <div
       title={group.name}
-      className={`inline-flex items-center justify-center rounded-full text-white font-semibold ring-2 ring-white/50 shadow-sm ${className}`}
+      className={`inline-flex items-center justify-center rounded-full text-slate-950 font-bold ring-2 ring-white/20 shadow-lg shadow-black/30 ${className}`}
       style={{
         width: size,
         height: size,

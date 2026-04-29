@@ -28,56 +28,56 @@ function eventIcon(e: FeedEntry): IconStyle {
     case "kom":
       return {
         Icon: Trophy,
-        bg: "bg-amber-100/80",
-        fg: "text-amber-700",
+        bg: "bg-amber-500/20",
+        fg: "text-amber-300",
       };
     case "segment_challenge":
       return {
         Icon: Trophy,
-        bg: "bg-fuchsia-100/80",
-        fg: "text-fuchsia-700",
+        bg: "bg-fuchsia-500/20",
+        fg: "text-fuchsia-300",
       };
     case "top_ten":
       return {
         Icon: Medal,
-        bg: "bg-slate-200/80",
-        fg: "text-slate-700",
+        bg: "bg-slate-300/20",
+        fg: "text-slate-200",
       };
     case "achievement":
       return {
         Icon: Award,
-        bg: "bg-violet-100/80",
-        fg: "text-violet-700",
+        bg: "bg-violet-500/20",
+        fg: "text-violet-300",
       };
     case "elevation_m":
       return {
         Icon: Mountain,
-        bg: "bg-stone-200/80",
-        fg: "text-stone-700",
+        bg: "bg-stone-300/15",
+        fg: "text-stone-200",
       };
     case "distance_km":
       if (e.rule_sport_type === "Ride")
         return {
           Icon: Bike,
-          bg: "bg-sky-100/80",
-          fg: "text-sky-700",
+          bg: "bg-cyan-500/20",
+          fg: "text-cyan-300",
         };
       if (e.rule_sport_type === "Run")
         return {
           Icon: Footprints,
-          bg: "bg-emerald-100/80",
-          fg: "text-emerald-700",
+          bg: "bg-emerald-500/20",
+          fg: "text-emerald-300",
         };
       return {
         Icon: ActivityIcon,
-        bg: "bg-gray-100/80",
-        fg: "text-gray-700",
+        bg: "bg-white/10",
+        fg: "text-slate-300",
       };
     default:
       return {
         Icon: ActivityIcon,
-        bg: "bg-gray-100/80",
-        fg: "text-gray-700",
+        bg: "bg-white/10",
+        fg: "text-slate-300",
       };
   }
 }
@@ -92,38 +92,38 @@ type Tier = {
 function tierFor(points: number): Tier {
   if (points >= 250) {
     return {
-      card: "shimmer-bg bg-gradient-to-r from-amber-200/70 via-yellow-100/60 to-amber-200/70 ring-2 ring-amber-300/80 shadow-lg shadow-amber-200/40",
-      points: "text-amber-700 text-base",
+      card: "shimmer-bg bg-gradient-to-r from-amber-500/20 via-yellow-400/15 to-amber-500/20 ring-2 ring-amber-400/60 shadow-lg shadow-amber-500/20",
+      points: "text-amber-300 text-base",
       badgeRing: "ring-amber-400",
       sparkles: 2,
     };
   }
   if (points >= 150) {
     return {
-      card: "bg-gradient-to-r from-violet-100/60 to-fuchsia-100/50 ring-1 ring-violet-300/70 shadow-md",
-      points: "text-violet-700 text-base",
-      badgeRing: "ring-violet-300",
+      card: "bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 ring-1 ring-violet-400/50 shadow-md",
+      points: "text-violet-300 text-base",
+      badgeRing: "ring-violet-400",
       sparkles: 1,
     };
   }
   if (points >= 75) {
     return {
-      card: "bg-sky-100/40 ring-1 ring-sky-300/60",
-      points: "text-sky-700",
-      badgeRing: "ring-sky-300",
+      card: "bg-cyan-500/10 ring-1 ring-cyan-400/40",
+      points: "text-cyan-300",
+      badgeRing: "ring-cyan-400",
     };
   }
   if (points >= 40) {
     return {
-      card: "bg-emerald-100/30",
-      points: "text-emerald-700",
-      badgeRing: "ring-emerald-200",
+      card: "bg-emerald-500/10 ring-1 ring-emerald-400/30",
+      points: "text-emerald-300",
+      badgeRing: "ring-emerald-400/60",
     };
   }
   return {
-    card: "bg-gray-100/40",
-    points: "text-[#3e7f6b]",
-    badgeRing: "ring-white/40",
+    card: "bg-white/5 ring-1 ring-white/10",
+    points: "text-orange-300",
+    badgeRing: "ring-white/20",
   };
 }
 
@@ -186,7 +186,6 @@ type Group = {
   key: string;
   entries: FeedEntry[];
   totalPoints: number;
-  /** Time to display + sort by. Activity start_date when known, else earned_at. */
   eventTime: string;
 };
 
@@ -235,7 +234,7 @@ export default function FeedList({
   }
   if (!data || data.length === 0) {
     return (
-      <p className="text-gray-700">
+      <p className="text-slate-400">
         No activity yet. Members will appear here once they earn points.
       </p>
     );
@@ -260,7 +259,7 @@ export default function FeedList({
                 href={`https://www.strava.com/activities/${head.activity_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-gray-900 hover:text-[#3e7f6b]"
+                className="inline-flex items-center gap-1 font-medium text-slate-100 hover:text-orange-300"
               >
                 {head.activity_name ?? `Activity ${head.activity_id}`}
                 <ExternalLink
@@ -272,7 +271,7 @@ export default function FeedList({
               </a>
               <Link
                 href={`/activities/${head.activity_id}`}
-                className="inline-flex items-center gap-0.5 text-xs text-gray-600 hover:text-[#3e7f6b]"
+                className="inline-flex items-center gap-0.5 text-xs text-slate-400 hover:text-cyan-300"
                 title="View map"
               >
                 <MapIcon size={12} strokeWidth={2.5} aria-hidden="true" />
@@ -284,7 +283,7 @@ export default function FeedList({
         return (
           <li
             key={g.key}
-            className={`flex items-start gap-3 rounded-2xl backdrop-blur-xl px-4 py-3 transition-all ${tier.card}`}
+            className={`flex items-start gap-3 rounded-2xl px-4 py-3 transition-all ${tier.card}`}
           >
             <div className="relative shrink-0">
               {head.profile_url ? (
@@ -296,12 +295,12 @@ export default function FeedList({
                 />
               ) : (
                 <div
-                  className={`h-10 w-10 rounded-full bg-white/40 ring-2 ${tier.badgeRing}`}
+                  className={`h-10 w-10 rounded-full bg-white/10 ring-2 ${tier.badgeRing}`}
                 />
               )}
               {!isMulti && (
                 <span
-                  className={`absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white/60 shadow-sm ${eventIcon(head).bg} ${eventIcon(head).fg}`}
+                  className={`absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-slate-900 shadow-sm ${eventIcon(head).bg} ${eventIcon(head).fg}`}
                   aria-hidden="true"
                 >
                   {(() => {
@@ -312,7 +311,7 @@ export default function FeedList({
               )}
               {isMulti && (
                 <span
-                  className="absolute -bottom-1 -right-1 inline-flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-[#3e7f6b] text-white text-[10px] font-bold ring-2 ring-white/60 shadow-sm"
+                  className="absolute -bottom-1 -right-1 inline-flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-orange-400 text-slate-950 text-[10px] font-bold ring-2 ring-slate-900 shadow-sm"
                   title={`${g.entries.length} events`}
                 >
                   ×{g.entries.length}
@@ -321,11 +320,11 @@ export default function FeedList({
             </div>
 
             <div className="flex-1 text-sm min-w-0">
-              <p className="text-gray-800">
+              <p className="text-slate-200">
                 <span className="font-semibold">{name}</span>
-                <span className="text-gray-600"> earned </span>
+                <span className="text-slate-400"> earned </span>
                 <span
-                  className={`font-bold inline-flex items-center gap-1 ${tier.points}`}
+                  className={`font-bold tabular-nums inline-flex items-center gap-1 ${tier.points}`}
                 >
                   {tier.sparkles ? (
                     <Sparkles size={14} strokeWidth={2.5} />
@@ -336,21 +335,21 @@ export default function FeedList({
                   ) : null}
                 </span>
                 {!isMulti && (
-                  <span className="text-gray-600"> for {ruleLabel(head)}</span>
+                  <span className="text-slate-400"> for {ruleLabel(head)}</span>
                 )}
               </p>
 
               {activityLink && (
-                <p className="mt-0.5 text-gray-600">on {activityLink}</p>
+                <p className="mt-0.5 text-slate-400">on {activityLink}</p>
               )}
               {summary && (
-                <p className="mt-0.5 text-xs text-gray-700 font-medium">
+                <p className="mt-0.5 text-xs text-slate-300 font-medium tabular-nums">
                   {summary}
                 </p>
               )}
 
               {isMulti && (
-                <ul className="mt-2 space-y-1 border-t border-white/40 pt-2">
+                <ul className="mt-2 space-y-1 border-t border-white/10 pt-2">
                   {g.entries.map((e) => {
                     const { Icon, bg, fg } = eventIcon(e);
                     return (
@@ -364,8 +363,8 @@ export default function FeedList({
                         >
                           <Icon size={11} strokeWidth={2.5} />
                         </span>
-                        <span className="text-gray-700">{ruleLabel(e)}</span>
-                        <span className="ml-auto font-semibold text-[#3e7f6b]">
+                        <span className="text-slate-300">{ruleLabel(e)}</span>
+                        <span className="ml-auto font-bold tabular-nums text-orange-300">
                           +{e.points}
                         </span>
                       </li>
@@ -374,7 +373,7 @@ export default function FeedList({
                 </ul>
               )}
 
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-slate-500">
                 {timeAgo(g.eventTime)}
               </p>
             </div>

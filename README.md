@@ -18,3 +18,6 @@ future features:
 - Backend overhaul, optimize queries, functions, use extractors, general review + cleanup - does the design make sense? encapsulation boundaries and code organization
 - audit, are we following strava guidelines? https://www.strava.com/legal/api https://developers.strava.com/guidelines/
 - Are we handling rate limits?
+- At end of leaderboard, last 5 days, add extra design cues to make it clear that the end is close
+- Better logo
+- 

@@ -13,8 +13,18 @@ const columns: ColumnDef<LeaderboardEntry>[] = [
       const rank = info.getValue() as number;
       const medal =
         rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
+      const tint =
+        rank === 1
+          ? "text-amber-300"
+          : rank === 2
+            ? "text-slate-200"
+            : rank === 3
+              ? "text-orange-300"
+              : "text-slate-400";
       return (
-        <span className="font-semibold text-gray-700 inline-flex items-center gap-1">
+        <span
+          className={`font-bold tabular-nums inline-flex items-center gap-1 ${tint}`}
+        >
           {medal ?? rank}
         </span>
       );
@@ -28,6 +38,14 @@ const columns: ColumnDef<LeaderboardEntry>[] = [
       const name =
         [r.firstname, r.lastname].filter(Boolean).join(" ") ||
         `Athlete ${r.athlete_id}`;
+      const ringTint =
+        r.rank === 1
+          ? "ring-amber-400/60"
+          : r.rank === 2
+            ? "ring-slate-300/50"
+            : r.rank === 3
+              ? "ring-orange-400/50"
+              : "ring-white/10";
       return (
         <div className="flex items-center gap-3">
           {r.profile_url ? (
@@ -35,12 +53,14 @@ const columns: ColumnDef<LeaderboardEntry>[] = [
             <img
               src={r.profile_url}
               alt={name}
-              className="h-8 w-8 rounded-full object-cover ring-1 ring-white/40"
+              className={`h-8 w-8 rounded-full object-cover ring-2 ${ringTint}`}
             />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-white/40" />
+            <div
+              className={`h-8 w-8 rounded-full bg-white/10 ring-2 ${ringTint}`}
+            />
           )}
-          <span>{name}</span>
+          <span className="font-medium text-slate-100">{name}</span>
         </div>
       );
     },
@@ -49,7 +69,7 @@ const columns: ColumnDef<LeaderboardEntry>[] = [
     accessorKey: "points",
     header: "Points",
     cell: (info) => (
-      <span className="font-semibold text-[#3e7f6b]">
+      <span className="font-bold tabular-nums text-orange-300">
         {(info.getValue() as number).toLocaleString()}
       </span>
     ),
@@ -57,6 +77,11 @@ const columns: ColumnDef<LeaderboardEntry>[] = [
   {
     accessorKey: "activity_count",
     header: "Activities",
+    cell: (info) => (
+      <span className="tabular-nums text-slate-300">
+        {info.getValue() as number}
+      </span>
+    ),
   },
 ];
 

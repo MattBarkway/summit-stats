@@ -43,8 +43,8 @@ export default function InviteLinkDisplay({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex-1 min-w-0 rounded-xl bg-white/40 backdrop-blur-sm border border-white/40 px-3 py-2">
-        <p className="font-mono text-xs sm:text-sm text-gray-800 truncate">
+      <div className="flex-1 min-w-0 rounded-xl bg-white/5 ring-1 ring-white/10 px-3 py-2">
+        <p className="font-mono text-xs sm:text-sm text-slate-300 truncate">
           {url || "…"}
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function InviteLinkDisplay({
         type="button"
         onClick={copy}
         disabled={!url}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-white/50 hover:bg-white/70 px-3 py-2 text-sm font-medium text-gray-700 transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 ring-1 ring-white/10 hover:bg-white/10 px-3 py-2 text-sm font-medium text-slate-200 transition-colors disabled:opacity-50"
       >
         {copied ? <Check size={14} /> : <Copy size={14} />}
         {copied ? "Copied" : "Copy"}
@@ -62,7 +62,7 @@ export default function InviteLinkDisplay({
           type="button"
           onClick={share}
           disabled={!url}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#3e7f6b]/80 hover:bg-[#358d73] px-3 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-orange-400 hover:bg-orange-500 px-3 py-2 text-sm font-bold text-slate-950 transition-colors disabled:opacity-50"
         >
           <Share2 size={14} />
           Share

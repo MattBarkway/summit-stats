@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n                r.athlete_id,\n                u.firstname,\n                u.lastname,\n                u.profile_url,\n                r.best_time_s,\n                r.rank\n            FROM segment_challenge_results r\n            JOIN users u ON u.athlete_id = r.athlete_id\n            WHERE r.challenge_id = $1\n            ORDER BY r.rank\n            ",
+  "query": "\n                SELECT\n                    r.athlete_id,\n                    u.firstname,\n                    u.lastname,\n                    u.profile_url,\n                    r.best_time_s,\n                    r.rank\n                FROM segment_challenge_results r\n                JOIN users u ON u.athlete_id = r.athlete_id\n                WHERE r.challenge_id = $1\n                ORDER BY r.rank\n                ",
   "describe": {
     "columns": [
       {
@@ -48,5 +48,5 @@
       false
     ]
   },
-  "hash": "51fc0eb24842cbe46b624aee3364b155ea9044f4df5e2fc0779c7c734632ffc6"
+  "hash": "dc7c250b5024f57fa003098553ae38818fcacc2da17f587adf0980e87cf4d5dc"
 }

@@ -47,7 +47,7 @@ export default function RulesList({
   const [editing, setEditing] = useState<Rule | null>(null);
   const [creating, setCreating] = useState(false);
 
-  if (isLoading) return <p className="text-gray-700">Loading rules…</p>;
+  if (isLoading) return <p className="text-slate-400">Loading rules…</p>;
   if (error)
     return (
       <ErrorState
@@ -60,14 +60,14 @@ export default function RulesList({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-slate-400 tabular-nums">
           {rules?.length ?? 0} rule{rules?.length === 1 ? "" : "s"}
         </p>
         {isOwner && (
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="inline-flex items-center gap-1 rounded-lg bg-[#3e7f6b]/80 px-3 py-1.5 text-sm text-white hover:bg-[#358d73] transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg bg-orange-400 px-3 py-1.5 text-sm font-bold text-slate-950 hover:bg-orange-500 transition-colors"
           >
             <Plus size={14} />
             Add rule
@@ -80,17 +80,17 @@ export default function RulesList({
           {rules.map((r) => (
             <li
               key={r.id}
-              className="flex items-center gap-3 rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md px-4 py-3"
+              className="flex items-center gap-3 rounded-2xl bg-white/5 ring-1 ring-white/10 shadow-md px-4 py-3"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-800">
-                  <span className="font-medium">
+                <p className="text-sm text-slate-200">
+                  <span className="font-semibold">
                     {TRIGGER_LABELS[r.trigger_type]}
                   </span>{" "}
-                  · {ruleSummary(r)}
+                  · <span className="text-slate-400">{ruleSummary(r)}</span>
                 </p>
               </div>
-              <span className="rounded-full bg-[#3e7f6b]/15 px-2.5 py-0.5 text-sm font-medium text-[#3e7f6b]">
+              <span className="rounded-full bg-orange-400/15 ring-1 ring-orange-400/30 px-2.5 py-0.5 text-sm font-bold tabular-nums text-orange-300">
                 {r.points} pts
               </span>
               {isOwner && (
@@ -98,7 +98,7 @@ export default function RulesList({
                   <button
                     type="button"
                     onClick={() => setEditing(r)}
-                    className="rounded-md p-1.5 text-gray-600 hover:bg-white/50 hover:text-gray-900"
+                    className="rounded-md p-1.5 text-slate-400 hover:bg-white/10 hover:text-slate-100"
                     title="Edit"
                   >
                     <Pencil size={14} />
@@ -114,7 +114,7 @@ export default function RulesList({
                         return;
                       await remove.mutateAsync(r.id);
                     }}
-                    className="rounded-md p-1.5 text-red-600 hover:bg-red-50"
+                    className="rounded-md p-1.5 text-red-400 hover:bg-red-500/10"
                     title="Delete"
                   >
                     <Trash2 size={14} />
@@ -125,7 +125,7 @@ export default function RulesList({
           ))}
         </ul>
       ) : (
-        <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5 text-center text-gray-700">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5 text-center text-slate-400">
           No rules yet. {isOwner ? "Add one to start awarding points." : ""}
         </div>
       )}

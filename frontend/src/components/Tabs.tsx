@@ -16,7 +16,7 @@ export default function Tabs<T extends string>({
   onChange: (id: T) => void;
 }) {
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-full bg-white/30 backdrop-blur-xl p-1 shadow-md">
+    <div className="inline-flex gap-1 border-b border-white/10 -mb-px">
       {tabs.map((t) => {
         const active = value === t.id;
         return (
@@ -24,17 +24,17 @@ export default function Tabs<T extends string>({
             key={t.id}
             type="button"
             onClick={() => onChange(t.id)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
+            className={`px-4 py-2 text-sm font-medium tracking-tight border-b-2 transition-all duration-200 ${
               active
-                ? "bg-white/70 text-gray-900 shadow-sm"
-                : "text-gray-700 hover:bg-white/50"
+                ? "border-orange-400 text-white"
+                : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
             {t.label}
             {t.count !== undefined && (
               <span
-                className={`ml-2 text-xs ${
-                  active ? "text-gray-600" : "text-gray-500"
+                className={`ml-2 text-xs tabular-nums ${
+                  active ? "text-slate-300" : "text-slate-500"
                 }`}
               >
                 {t.count}

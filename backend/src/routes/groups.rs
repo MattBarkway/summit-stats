@@ -1,14 +1,24 @@
 use crate::AppState;
+use crate::errors::{AppError, AppResult};
 use crate::extractors::current_user::CurrentUser;
+use crate::extractors::membership::{GroupMember, GroupOwner};
 use crate::extractors::strava::StravaClient;
-use crate::services::activity_sync;
-use crate::services::badges;
-use crate::services::segment_challenges;
+use crate::models::api::badge::BadgeSummary;
+use crate::models::api::challenge::{Challenge, ChallengeResultEntry, CreateChallengeRequest};
+use crate::models::api::cycle::{CycleBounds, LeaderboardQuery};
+use crate::models::api::feed::FeedEntry;
+use crate::models::api::group::{
+    CreateGroupRequest, GroupDetail, GroupPreview, GroupSummary, JoinGroupRequest, MemberDetail,
+    MemberSummary, UpdateGroupRequest,
+};
+use crate::models::api::leaderboard::{LeaderboardEntry, LeaderboardResponse};
+use crate::models::api::rule::{CreateRuleRequest, Rule, UpdateRuleRequest, VALID_TRIGGERS};
+use crate::repository::groups::fetch_cycle_bounds;
+use crate::services::{activity_sync, badges, segment_challenges};
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::{get, post};
 use axum::{Json, Router};
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::sync::Arc;
 use time::OffsetDateTime;
@@ -29,7 +39,10 @@ pub fn routes() -> Router<Arc<AppState>> {
             "/{id}/rules/{rule_id}",
             axum::routing::patch(update_rule).delete(delete_rule),
         )
-        .route("/{id}/challenges", get(list_challenges).post(create_challenge))
+        .route(
+            "/{id}/challenges",
+            get(list_challenges).post(create_challenge),
+        )
         .route(
             "/{id}/challenges/{cid}",
             axum::routing::delete(delete_challenge),
@@ -39,218 +52,16 @@ pub fn routes() -> Router<Arc<AppState>> {
         .route("/{id}/members/{athlete_id}", get(get_member))
 }
 
-#[derive(Deserialize)]
-struct CreateGroupRequest {
-    name: String,
-    description: Option<String>,
-}
-
-#[derive(Serialize)]
-struct GroupSummary {
-    id: Uuid,
-    name: String,
-    description: Option<String>,
-    icon_url: Option<String>,
-    member_count: i64,
-    my_points: i64,
-    cycle_type: String,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_start: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_end: OffsetDateTime,
-}
-
-#[derive(Serialize)]
-struct GroupDetail {
-    id: Uuid,
-    name: String,
-    description: Option<String>,
-    icon_url: Option<String>,
-    invite_code: String,
-    owner_id: i64,
-    members: Vec<MemberSummary>,
-    cycle_type: String,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_start: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_end: OffsetDateTime,
-}
-
-#[derive(Serialize)]
-struct GroupPreview {
-    name: String,
-    icon_url: Option<String>,
-    member_count: i64,
-    owner_name: String,
-    cycle_type: String,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_start: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_end: OffsetDateTime,
-}
-
-#[derive(Serialize)]
-struct Rule {
-    id: Uuid,
-    trigger_type: String,
-    threshold: f64,
-    points: i32,
-    sport_type: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct CreateRuleRequest {
-    trigger_type: String,
-    threshold: f64,
-    points: i32,
-    sport_type: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct UpdateRuleRequest {
-    threshold: Option<f64>,
-    points: Option<i32>,
-}
-
-#[derive(Deserialize)]
-struct UpdateGroupRequest {
-    name: Option<String>,
-    description: Option<String>,
-    icon_url: Option<String>,
-}
-
-#[derive(Serialize)]
-struct MemberSummary {
-    athlete_id: i64,
-    firstname: Option<String>,
-    lastname: Option<String>,
-    profile_url: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct JoinGroupRequest {
-    invite_code: String,
-}
-
-#[derive(Serialize)]
-struct FeedEntry {
-    id: Uuid,
-    #[serde(with = "time::serde::rfc3339")]
-    earned_at: OffsetDateTime,
-    points: i32,
-    athlete_id: i64,
-    firstname: Option<String>,
-    lastname: Option<String>,
-    profile_url: Option<String>,
-    activity_id: Option<i64>,
-    activity_name: Option<String>,
-    activity_sport_type: Option<String>,
-    activity_distance_m: Option<f64>,
-    activity_moving_time_s: Option<i32>,
-    activity_elevation_m: Option<f64>,
-    #[serde(with = "time::serde::rfc3339::option")]
-    activity_start_date: Option<OffsetDateTime>,
-    trigger_type: String,
-    threshold: f64,
-    rule_sport_type: Option<String>,
-}
-
-#[derive(Serialize)]
-struct BadgeSummary {
-    slug: String,
-    name: String,
-    description: String,
-    icon: String,
-    #[serde(with = "time::serde::rfc3339")]
-    awarded_at: OffsetDateTime,
-    context: Option<serde_json::Value>,
-}
-
-#[derive(Serialize)]
-struct MemberDetail {
-    athlete_id: i64,
-    firstname: Option<String>,
-    lastname: Option<String>,
-    profile_url: Option<String>,
-    rank: i64,
-    points: i64,
-    activity_count: i64,
-    total_distance_m: f64,
-    total_elevation_m: f64,
-    cycle_type: String,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_start: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_end: OffsetDateTime,
-    events: Vec<FeedEntry>,
-    badges: Vec<BadgeSummary>,
-}
-
-#[derive(Serialize)]
-struct LeaderboardEntry {
-    rank: i64,
-    athlete_id: i64,
-    firstname: Option<String>,
-    lastname: Option<String>,
-    profile_url: Option<String>,
-    points: i64,
-    activity_count: i64,
-}
-
-#[derive(Serialize)]
-struct LeaderboardResponse {
-    cycle_type: String,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_start: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    cycle_end: OffsetDateTime,
-    entries: Vec<LeaderboardEntry>,
-}
-
-struct CycleBounds {
-    cycle_type: String,
-    start_at: OffsetDateTime,
-    end_at: OffsetDateTime,
-}
-
-async fn fetch_cycle_bounds(
-    db: &PgPool,
-    group_id: Uuid,
-) -> Result<CycleBounds, (StatusCode, String)> {
-    let row = sqlx::query!(
-        r#"
-        SELECT
-            g.cycle_type::text AS "cycle_type!",
-            cb.start_at        AS "start_at!",
-            cb.end_at          AS "end_at!"
-        FROM groups g
-        CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb
-        WHERE g.id = $1
-        "#,
-        group_id
-    )
-    .fetch_optional(db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
-
-    Ok(CycleBounds {
-        cycle_type: row.cycle_type,
-        start_at: row.start_at,
-        end_at: row.end_at,
-    })
-}
-
 async fn create_group(
     State(state): State<Arc<AppState>>,
     CurrentUser { athlete_id }: CurrentUser,
     Json(req): Json<CreateGroupRequest>,
-) -> Result<Json<GroupDetail>, (StatusCode, String)> {
+) -> AppResult<Json<GroupDetail>> {
     if req.name.trim().is_empty() {
-        return Err((StatusCode::BAD_REQUEST, "name required".into()));
+        return Err(AppError::BadRequest("name required".into()));
     }
 
-    let mut tx = state.db.begin().await.map_err(internal)?;
+    let mut tx = state.db.begin().await?;
 
     let group = sqlx::query!(
         r#"
@@ -263,8 +74,7 @@ async fn create_group(
         athlete_id,
     )
     .fetch_one(&mut *tx)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     sqlx::query!(
         "INSERT INTO group_members (group_id, athlete_id) VALUES ($1, $2)",
@@ -272,20 +82,14 @@ async fn create_group(
         athlete_id,
     )
     .execute(&mut *tx)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     seed_default_rules(&mut *tx, group.id).await?;
 
-    tx.commit().await.map_err(internal)?;
+    tx.commit().await?;
 
-    if let Err(e) = badges::award_group_badge(
-        &state.db,
-        athlete_id,
-        group.id,
-        "group_founder",
-    )
-    .await
+    if let Err(e) = badges::award_group_badge(&state.db, athlete_id, group.id, "group_founder")
+        .await
     {
         tracing::warn!("group_founder badge award failed: {}", e);
     }
@@ -293,10 +97,7 @@ async fn create_group(
     fetch_group_detail(&state.db, group.id).await
 }
 
-async fn seed_default_rules(
-    tx: &mut sqlx::PgConnection,
-    group_id: Uuid,
-) -> Result<(), (StatusCode, String)> {
+async fn seed_default_rules(tx: &mut sqlx::PgConnection, group_id: Uuid) -> AppResult<()> {
     let rules: &[(&str, f64, i32, Option<&str>)] = &[
         ("distance_km", 50.0, 100, Some("Ride")),
         ("distance_km", 100.0, 250, Some("Ride")),
@@ -320,8 +121,7 @@ async fn seed_default_rules(
         .bind(*points)
         .bind(*sport)
         .execute(&mut *tx)
-        .await
-        .map_err(internal)?;
+        .await?;
     }
     Ok(())
 }
@@ -329,7 +129,7 @@ async fn seed_default_rules(
 async fn list_groups(
     State(state): State<Arc<AppState>>,
     CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<Vec<GroupSummary>>, (StatusCode, String)> {
+) -> AppResult<Json<Vec<GroupSummary>>> {
     let rows = sqlx::query!(
         r#"
         SELECT
@@ -359,8 +159,7 @@ async fn list_groups(
         athlete_id
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let groups = rows
         .into_iter()
@@ -382,17 +181,12 @@ async fn list_groups(
 
 async fn get_group(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<GroupDetail>, (StatusCode, String)> {
-    require_member(&state.db, id, athlete_id).await?;
-    fetch_group_detail(&state.db, id).await
+    GroupMember { group_id, .. }: GroupMember,
+) -> AppResult<Json<GroupDetail>> {
+    fetch_group_detail(&state.db, group_id).await
 }
 
-async fn fetch_group_detail(
-    db: &PgPool,
-    id: Uuid,
-) -> Result<Json<GroupDetail>, (StatusCode, String)> {
+async fn fetch_group_detail(db: &PgPool, id: Uuid) -> AppResult<Json<GroupDetail>> {
     let g = sqlx::query!(
         r#"
         SELECT
@@ -412,9 +206,8 @@ async fn fetch_group_detail(
         id
     )
     .fetch_optional(db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
+    .await?
+    .ok_or(AppError::NotFound("group not found"))?;
 
     let members = sqlx::query!(
         r#"
@@ -427,8 +220,7 @@ async fn fetch_group_detail(
         id
     )
     .fetch_all(db)
-    .await
-    .map_err(internal)?
+    .await?
     .into_iter()
     .map(|r| MemberSummary {
         athlete_id: r.athlete_id,
@@ -454,37 +246,25 @@ async fn fetch_group_detail(
 
 async fn update_group(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
+    GroupOwner { group_id, .. }: GroupOwner,
     Json(req): Json<UpdateGroupRequest>,
-) -> Result<Json<GroupDetail>, (StatusCode, String)> {
-    let owner = sqlx::query_scalar!("SELECT owner_id FROM groups WHERE id = $1", id)
-        .fetch_optional(&state.db)
-        .await
-        .map_err(internal)?
-        .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
-
-    if owner != athlete_id {
-        return Err((StatusCode::FORBIDDEN, "only owner can edit".into()));
-    }
-
+) -> AppResult<Json<GroupDetail>> {
     let trimmed_name = req.name.as_ref().map(|s| s.trim().to_string());
     if let Some(n) = &trimmed_name {
         if n.is_empty() {
-            return Err((StatusCode::BAD_REQUEST, "name cannot be empty".into()));
+            return Err(AppError::BadRequest("name cannot be empty".into()));
         }
     }
 
     let icon_url = match req.icon_url.as_ref().map(|s| s.trim()) {
-        Some("") => Some(None), // explicit clear
+        Some("") => Some(None),
         Some(url) if url.starts_with("https://") => Some(Some(url.to_string())),
         Some(_) => {
-            return Err((
-                StatusCode::BAD_REQUEST,
+            return Err(AppError::BadRequest(
                 "icon_url must start with https://".into(),
             ));
         }
-        None => None, // unchanged
+        None => None,
     };
 
     sqlx::query!(
@@ -496,7 +276,7 @@ async fn update_group(
             icon_url    = CASE WHEN $5::boolean THEN $6 ELSE icon_url END
         WHERE id = $1
         "#,
-        id,
+        group_id,
         trimmed_name,
         req.description.is_some(),
         req.description.as_deref(),
@@ -504,16 +284,15 @@ async fn update_group(
         icon_url.flatten(),
     )
     .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
-    fetch_group_detail(&state.db, id).await
+    fetch_group_detail(&state.db, group_id).await
 }
 
 async fn get_preview(
     State(state): State<Arc<AppState>>,
     Path(code): Path<String>,
-) -> Result<Json<GroupPreview>, (StatusCode, String)> {
+) -> AppResult<Json<GroupPreview>> {
     let row = sqlx::query!(
         r#"
         SELECT
@@ -535,9 +314,8 @@ async fn get_preview(
         code.trim()
     )
     .fetch_optional(&state.db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "invite code not found".into()))?;
+    .await?
+    .ok_or(AppError::NotFound("invite code not found"))?;
 
     Ok(Json(GroupPreview {
         name: row.name,
@@ -554,15 +332,14 @@ async fn join_group(
     State(state): State<Arc<AppState>>,
     CurrentUser { athlete_id }: CurrentUser,
     Json(req): Json<JoinGroupRequest>,
-) -> Result<Json<GroupDetail>, (StatusCode, String)> {
+) -> AppResult<Json<GroupDetail>> {
     let group = sqlx::query!(
         "SELECT id FROM groups WHERE invite_code = $1",
         req.invite_code.trim()
     )
     .fetch_optional(&state.db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "invite code not found".into()))?;
+    .await?
+    .ok_or(AppError::NotFound("invite code not found"))?;
 
     sqlx::query!(
         r#"
@@ -574,91 +351,55 @@ async fn join_group(
         athlete_id,
     )
     .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     fetch_group_detail(&state.db, group.id).await
 }
 
 async fn leave_group(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<StatusCode, (StatusCode, String)> {
-    let owner = sqlx::query_scalar!("SELECT owner_id FROM groups WHERE id = $1", id)
-        .fetch_optional(&state.db)
-        .await
-        .map_err(internal)?
-        .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
-
+    GroupMember { group_id, athlete_id }: GroupMember,
+) -> AppResult<StatusCode> {
+    let owner = crate::repository::groups::get_group_owner(&state.db, group_id).await?;
     if owner == athlete_id {
-        return Err((
-            StatusCode::FORBIDDEN,
-            "owner must delete the group instead of leaving".into(),
+        return Err(AppError::Forbidden(
+            "owner must delete the group instead of leaving",
         ));
     }
 
     sqlx::query!(
         "DELETE FROM group_members WHERE group_id = $1 AND athlete_id = $2",
-        id,
+        group_id,
         athlete_id,
     )
     .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     Ok(StatusCode::NO_CONTENT)
 }
 
 async fn delete_group(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<StatusCode, (StatusCode, String)> {
-    let owner = sqlx::query_scalar!("SELECT owner_id FROM groups WHERE id = $1", id)
-        .fetch_optional(&state.db)
-        .await
-        .map_err(internal)?
-        .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
-
-    if owner != athlete_id {
-        return Err((StatusCode::FORBIDDEN, "only owner can delete".into()));
-    }
-
-    sqlx::query!("DELETE FROM groups WHERE id = $1", id)
+    GroupOwner { group_id, .. }: GroupOwner,
+) -> AppResult<StatusCode> {
+    sqlx::query!("DELETE FROM groups WHERE id = $1", group_id)
         .execute(&state.db)
-        .await
-        .map_err(internal)?;
-
+        .await?;
     Ok(StatusCode::NO_CONTENT)
-}
-
-#[derive(Deserialize)]
-struct LeaderboardQuery {
-    #[serde(default, with = "time::serde::rfc3339::option")]
-    cycle_start: Option<OffsetDateTime>,
-    #[serde(default, with = "time::serde::rfc3339::option")]
-    cycle_end: Option<OffsetDateTime>,
 }
 
 async fn get_leaderboard(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
     Query(q): Query<LeaderboardQuery>,
     StravaClient { client }: StravaClient,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<LeaderboardResponse>, (StatusCode, String)> {
-    require_member(&state.db, id, athlete_id).await?;
+    GroupMember { group_id, athlete_id }: GroupMember,
+) -> AppResult<Json<LeaderboardResponse>> {
+    let live_bounds = fetch_cycle_bounds(&state.db, group_id).await?;
 
-    let live_bounds = fetch_cycle_bounds(&state.db, id).await?;
-
-    // Past-cycle override: if both start+end supplied, use them. Skip the live
-    // sync since past cycles don't change. Otherwise sync + use current cycle.
     let bounds = match (q.cycle_start, q.cycle_end) {
         (Some(s), Some(e)) => {
             if e <= s {
-                return Err((
-                    StatusCode::BAD_REQUEST,
+                return Err(AppError::BadRequest(
                     "cycle_end must be after cycle_start".into(),
                 ));
             }
@@ -674,10 +415,10 @@ async fn get_leaderboard(
             {
                 tracing::warn!("activity sync failed (continuing with cached data): {}", e);
             }
-            if let Err(e) = badges::award_closed_cycle_badges(&state.db, id).await {
+            if let Err(e) = badges::award_closed_cycle_badges(&state.db, group_id).await {
                 tracing::warn!("cycle-end badge award failed: {}", e);
             }
-            if let Err(e) = segment_challenges::resolve_expired(&state.db, id).await {
+            if let Err(e) = segment_challenges::resolve_expired(&state.db, group_id).await {
                 tracing::warn!("segment challenge resolution failed: {}", e);
             }
             live_bounds
@@ -711,13 +452,12 @@ async fn get_leaderboard(
         GROUP BY u.athlete_id, u.firstname, u.lastname, u.profile_url
         ORDER BY COALESCE(SUM(ep.points), 0) DESC, u.athlete_id
         "#,
-        id,
+        group_id,
         bounds.start_at,
         bounds.end_at,
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let entries = rows
         .into_iter()
@@ -743,11 +483,8 @@ async fn get_leaderboard(
 
 async fn get_feed(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<Vec<FeedEntry>>, (StatusCode, String)> {
-    require_member(&state.db, id, athlete_id).await?;
-
+    GroupMember { group_id, .. }: GroupMember,
+) -> AppResult<Json<Vec<FeedEntry>>> {
     let rows = sqlx::query!(
         r#"
         SELECT
@@ -776,11 +513,10 @@ async fn get_feed(
         ORDER BY COALESCE(a.start_date, ep.earned_at) DESC
         LIMIT 100
         "#,
-        id
+        group_id
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let feed = rows
         .into_iter()
@@ -810,13 +546,22 @@ async fn get_feed(
 
 async fn get_member(
     State(state): State<Arc<AppState>>,
-    Path((group_id, athlete_id)): Path<(Uuid, i64)>,
-    CurrentUser {
-        athlete_id: caller_athlete_id,
-    }: CurrentUser,
-) -> Result<Json<MemberDetail>, (StatusCode, String)> {
-    require_member(&state.db, group_id, caller_athlete_id).await?;
-    require_member(&state.db, group_id, athlete_id).await?;
+    Path((_, target_athlete_id)): Path<(Uuid, i64)>,
+    GroupMember { group_id, .. }: GroupMember,
+) -> AppResult<Json<MemberDetail>> {
+    // Caller's membership already proved by GroupMember extractor. Verify the
+    // *target* athlete is also a member of this group.
+    let target_is_member = sqlx::query_scalar!(
+        "SELECT EXISTS(SELECT 1 FROM group_members WHERE group_id = $1 AND athlete_id = $2)",
+        group_id,
+        target_athlete_id
+    )
+    .fetch_one(&state.db)
+    .await?
+    .unwrap_or(false);
+    if !target_is_member {
+        return Err(AppError::NotFound("member not found"));
+    }
 
     let bounds = fetch_cycle_bounds(&state.db, group_id).await?;
 
@@ -846,14 +591,13 @@ async fn get_member(
         GROUP BY u.athlete_id, u.firstname, u.lastname, u.profile_url
         "#,
         group_id,
-        athlete_id,
+        target_athlete_id,
         bounds.start_at,
         bounds.end_at,
     )
     .fetch_optional(&state.db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "member not found".into()))?;
+    .await?
+    .ok_or(AppError::NotFound("member not found"))?;
 
     let rank = sqlx::query_scalar!(
         r#"
@@ -875,8 +619,7 @@ async fn get_member(
         bounds.end_at,
     )
     .fetch_one(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let events = sqlx::query!(
         r#"
@@ -907,11 +650,10 @@ async fn get_member(
         LIMIT 200
         "#,
         group_id,
-        athlete_id,
+        target_athlete_id,
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?
+    .await?
     .into_iter()
     .map(|r| FeedEntry {
         id: r.id,
@@ -934,7 +676,7 @@ async fn get_member(
     })
     .collect();
 
-    let badges = sqlx::query!(
+    let badges_list = sqlx::query!(
         r#"
         SELECT b.slug, b.name, b.description, b.icon, ub.awarded_at, ub.context
         FROM user_badges ub
@@ -943,12 +685,11 @@ async fn get_member(
           AND (ub.group_id = $2 OR ub.group_id IS NULL)
         ORDER BY ub.awarded_at DESC
         "#,
-        athlete_id,
+        target_athlete_id,
         group_id,
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?
+    .await?
     .into_iter()
     .map(|r| BadgeSummary {
         slug: r.slug,
@@ -974,41 +715,14 @@ async fn get_member(
         cycle_start: bounds.start_at,
         cycle_end: bounds.end_at,
         events,
-        badges,
+        badges: badges_list,
     }))
 }
 
-async fn require_owner(
-    db: &PgPool,
-    group_id: Uuid,
-    athlete_id: i64,
-) -> Result<(), (StatusCode, String)> {
-    let owner = sqlx::query_scalar!("SELECT owner_id FROM groups WHERE id = $1", group_id)
-        .fetch_optional(db)
-        .await
-        .map_err(internal)?
-        .ok_or((StatusCode::NOT_FOUND, "group not found".into()))?;
-    if owner != athlete_id {
-        return Err((StatusCode::FORBIDDEN, "owner only".into()));
-    }
-    Ok(())
-}
-
-const VALID_TRIGGERS: &[&str] = &[
-    "distance_km",
-    "elevation_m",
-    "kom",
-    "top_ten",
-    "achievement",
-];
-
 async fn list_rules(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<Vec<Rule>>, (StatusCode, String)> {
-    require_member(&state.db, id, athlete_id).await?;
-
+    GroupMember { group_id, .. }: GroupMember,
+) -> AppResult<Json<Vec<Rule>>> {
     let rows = sqlx::query!(
         r#"
         SELECT id, trigger_type::text AS "trigger_type!", threshold, points, sport_type
@@ -1016,11 +730,10 @@ async fn list_rules(
         WHERE group_id = $1
         ORDER BY trigger_type, threshold
         "#,
-        id
+        group_id
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let rules = rows
         .into_iter()
@@ -1038,19 +751,20 @@ async fn list_rules(
 
 async fn create_rule(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
-    CurrentUser { athlete_id }: CurrentUser,
+    GroupOwner { group_id, .. }: GroupOwner,
     Json(req): Json<CreateRuleRequest>,
-) -> Result<Json<Rule>, (StatusCode, String)> {
-    require_owner(&state.db, id, athlete_id).await?;
-
+) -> AppResult<Json<Rule>> {
     if !VALID_TRIGGERS.contains(&req.trigger_type.as_str()) {
-        return Err((StatusCode::BAD_REQUEST, "invalid trigger_type".into()));
+        return Err(AppError::BadRequest("invalid trigger_type".into()));
     }
     if req.points < 0 {
-        return Err((StatusCode::BAD_REQUEST, "points must be >= 0".into()));
+        return Err(AppError::BadRequest("points must be >= 0".into()));
     }
-    let sport = req.sport_type.as_ref().map(|s| s.trim()).filter(|s| !s.is_empty());
+    let sport = req
+        .sport_type
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty());
 
     let row = sqlx::query!(
         r#"
@@ -1058,26 +772,16 @@ async fn create_rule(
         VALUES ($1, $2::text::point_trigger, $3, $4, $5)
         RETURNING id, trigger_type::text AS "trigger_type!", threshold, points, sport_type
         "#,
-        id,
+        group_id,
         req.trigger_type,
         req.threshold,
         req.points,
         sport,
     )
     .fetch_one(&state.db)
-    .await
-    .map_err(|e| {
-        if let sqlx::Error::Database(db_err) = &e {
-            if db_err.is_unique_violation() {
-                return (StatusCode::CONFLICT, "duplicate rule".into());
-            }
-        }
-        internal(e)
-    })?;
+    .await?;
 
-    activity_sync::evaluate_for_group(&state.db, id)
-        .await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    activity_sync::evaluate_for_group(&state.db, group_id).await?;
 
     Ok(Json(Rule {
         id: row.id,
@@ -1090,12 +794,10 @@ async fn create_rule(
 
 async fn update_rule(
     State(state): State<Arc<AppState>>,
-    Path((group_id, rule_id)): Path<(Uuid, Uuid)>,
-    CurrentUser { athlete_id }: CurrentUser,
+    Path((_, rule_id)): Path<(Uuid, Uuid)>,
+    GroupOwner { group_id, .. }: GroupOwner,
     Json(req): Json<UpdateRuleRequest>,
-) -> Result<Json<Rule>, (StatusCode, String)> {
-    require_owner(&state.db, group_id, athlete_id).await?;
-
+) -> AppResult<Json<Rule>> {
     let existing = sqlx::query!(
         r#"
         SELECT trigger_type::text AS "trigger_type!", threshold, points
@@ -1106,13 +808,15 @@ async fn update_rule(
         group_id,
     )
     .fetch_optional(&state.db)
-    .await
-    .map_err(internal)?
-    .ok_or((StatusCode::NOT_FOUND, "rule not found".into()))?;
+    .await?
+    .ok_or(AppError::NotFound("rule not found"))?;
 
     let new_threshold = req.threshold.unwrap_or(existing.threshold);
     let new_points = req.points.unwrap_or(existing.points);
-    let threshold_changed = req.threshold.is_some() && req.threshold != Some(existing.threshold);
+    let threshold_changed =
+        req.threshold.is_some() && req.threshold != Some(existing.threshold);
+
+    let mut tx = state.db.begin().await?;
 
     sqlx::query!(
         "UPDATE point_rules SET threshold = $1, points = $2 WHERE id = $3",
@@ -1120,29 +824,27 @@ async fn update_rule(
         new_points,
         rule_id,
     )
-    .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .execute(&mut *tx)
+    .await?;
 
     if threshold_changed {
-        // Threshold changed → invalidate prior awards, re-evaluate.
         sqlx::query!("DELETE FROM earned_points WHERE rule_id = $1", rule_id)
-            .execute(&state.db)
-            .await
-            .map_err(internal)?;
-        activity_sync::evaluate_for_group(&state.db, group_id)
-            .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+            .execute(&mut *tx)
+            .await?;
     } else if req.points.is_some() {
-        // Points-only change → keep awards, update their value.
         sqlx::query!(
             "UPDATE earned_points SET points = $1 WHERE rule_id = $2",
             new_points,
             rule_id,
         )
-        .execute(&state.db)
-        .await
-        .map_err(internal)?;
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    tx.commit().await?;
+
+    if threshold_changed {
+        activity_sync::evaluate_for_group(&state.db, group_id).await?;
     }
 
     let row = sqlx::query!(
@@ -1153,8 +855,7 @@ async fn update_rule(
         rule_id
     )
     .fetch_one(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     Ok(Json(Rule {
         id: row.id,
@@ -1167,71 +868,29 @@ async fn update_rule(
 
 async fn delete_rule(
     State(state): State<Arc<AppState>>,
-    Path((group_id, rule_id)): Path<(Uuid, Uuid)>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<StatusCode, (StatusCode, String)> {
-    require_owner(&state.db, group_id, athlete_id).await?;
+    Path((_, rule_id)): Path<(Uuid, Uuid)>,
+    GroupOwner { group_id, .. }: GroupOwner,
+) -> AppResult<StatusCode> {
     let result = sqlx::query!(
         "DELETE FROM point_rules WHERE id = $1 AND group_id = $2",
         rule_id,
         group_id,
     )
     .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, "rule not found".into()));
+        return Err(AppError::NotFound("rule not found"));
     }
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[derive(Serialize)]
-struct ChallengeResultEntry {
-    athlete_id: i64,
-    firstname: Option<String>,
-    lastname: Option<String>,
-    profile_url: Option<String>,
-    best_time_s: Option<i32>,
-    rank: Option<i32>,
-}
-
-#[derive(Serialize)]
-struct Challenge {
-    id: Uuid,
-    segment_id: i64,
-    segment_name: String,
-    #[serde(with = "time::serde::rfc3339")]
-    starts_at: OffsetDateTime,
-    #[serde(with = "time::serde::rfc3339")]
-    ends_at: OffsetDateTime,
-    points_winner: i32,
-    points_top3: i32,
-    points_finish: i32,
-    #[serde(with = "time::serde::rfc3339::option")]
-    resolved_at: Option<OffsetDateTime>,
-    results: Vec<ChallengeResultEntry>,
-}
-
-#[derive(Deserialize)]
-struct CreateChallengeRequest {
-    segment_id: i64,
-    #[serde(with = "time::serde::rfc3339")]
-    ends_at: OffsetDateTime,
-    points_winner: Option<i32>,
-    points_top3: Option<i32>,
-    points_finish: Option<i32>,
-}
-
 async fn list_challenges(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
     StravaClient { client: _ }: StravaClient,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<Json<Vec<Challenge>>, (StatusCode, String)> {
-    require_member(&state.db, id, athlete_id).await?;
-
-    if let Err(e) = segment_challenges::resolve_expired(&state.db, id).await {
+    GroupMember { group_id, .. }: GroupMember,
+) -> AppResult<Json<Vec<Challenge>>> {
+    if let Err(e) = segment_challenges::resolve_expired(&state.db, group_id).await {
         tracing::warn!("challenge resolution failed: {}", e);
     }
 
@@ -1243,48 +902,42 @@ async fn list_challenges(
         WHERE group_id = $1
         ORDER BY ends_at DESC
         "#,
-        id
+        group_id
     )
     .fetch_all(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     let mut challenges = Vec::with_capacity(rows.len());
     for c in rows {
-        let results = sqlx::query!(
-            r#"
-            SELECT
-                r.athlete_id,
-                u.firstname,
-                u.lastname,
-                u.profile_url,
-                r.best_time_s,
-                r.rank
-            FROM segment_challenge_results r
-            JOIN users u ON u.athlete_id = r.athlete_id
-            WHERE r.challenge_id = $1
-            ORDER BY r.rank
-            "#,
-            c.id
-        )
-        .fetch_all(&state.db)
-        .await
-        .map_err(internal)?;
-
-        // For active challenges (not yet resolved) compute live standings from
-        // the segment_efforts cache so members see progress.
         let entries = if c.resolved_at.is_some() {
-            results
-                .into_iter()
-                .map(|r| ChallengeResultEntry {
-                    athlete_id: r.athlete_id,
-                    firstname: r.firstname,
-                    lastname: r.lastname,
-                    profile_url: r.profile_url,
-                    best_time_s: Some(r.best_time_s),
-                    rank: Some(r.rank),
-                })
-                .collect()
+            sqlx::query!(
+                r#"
+                SELECT
+                    r.athlete_id,
+                    u.firstname,
+                    u.lastname,
+                    u.profile_url,
+                    r.best_time_s,
+                    r.rank
+                FROM segment_challenge_results r
+                JOIN users u ON u.athlete_id = r.athlete_id
+                WHERE r.challenge_id = $1
+                ORDER BY r.rank
+                "#,
+                c.id
+            )
+            .fetch_all(&state.db)
+            .await?
+            .into_iter()
+            .map(|r| ChallengeResultEntry {
+                athlete_id: r.athlete_id,
+                firstname: r.firstname,
+                lastname: r.lastname,
+                profile_url: r.profile_url,
+                best_time_s: Some(r.best_time_s),
+                rank: Some(r.rank),
+            })
+            .collect()
         } else {
             sqlx::query!(
                 r#"
@@ -1304,14 +957,13 @@ async fn list_challenges(
                 GROUP BY se.athlete_id, u.firstname, u.lastname, u.profile_url
                 ORDER BY MIN(se.elapsed_time_s) ASC
                 "#,
-                id,
+                group_id,
                 c.segment_id,
                 c.starts_at,
                 c.ends_at,
             )
             .fetch_all(&state.db)
-            .await
-            .map_err(internal)?
+            .await?
             .into_iter()
             .enumerate()
             .map(|(i, r)| ChallengeResultEntry {
@@ -1344,18 +996,12 @@ async fn list_challenges(
 
 async fn create_challenge(
     State(state): State<Arc<AppState>>,
-    Path(id): Path<Uuid>,
     StravaClient { client }: StravaClient,
-    CurrentUser { athlete_id }: CurrentUser,
+    GroupOwner { group_id, athlete_id }: GroupOwner,
     Json(req): Json<CreateChallengeRequest>,
-) -> Result<Json<Challenge>, (StatusCode, String)> {
-    require_owner(&state.db, id, athlete_id).await?;
-
+) -> AppResult<Json<Challenge>> {
     if req.ends_at <= OffsetDateTime::now_utc() {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            "ends_at must be in the future".into(),
-        ));
+        return Err(AppError::BadRequest("ends_at must be in the future".into()));
     }
 
     use strava_wrapper::prelude::*;
@@ -1366,12 +1012,12 @@ async fn create_challenge(
         .id(req.segment_id as u64)
         .send()
         .await
-        .map_err(|e| (StatusCode::BAD_REQUEST, format!("segment fetch: {:?}", e)))?;
+        .map_err(|e| AppError::Strava(format!("segment fetch: {:?}", e)))?;
 
     let segment_name = segment
         .name
         .clone()
-        .ok_or((StatusCode::BAD_GATEWAY, "segment missing name".into()))?;
+        .ok_or_else(|| AppError::Strava("segment missing name".into()))?;
 
     let row = sqlx::query!(
         r#"
@@ -1382,7 +1028,7 @@ async fn create_challenge(
         RETURNING id, segment_id, segment_name, starts_at, ends_at,
                   points_winner, points_top3, points_finish, resolved_at
         "#,
-        id,
+        group_id,
         req.segment_id,
         segment_name,
         req.ends_at,
@@ -1392,8 +1038,7 @@ async fn create_challenge(
         athlete_id,
     )
     .fetch_one(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
 
     Ok(Json(Challenge {
         id: row.id,
@@ -1411,45 +1056,18 @@ async fn create_challenge(
 
 async fn delete_challenge(
     State(state): State<Arc<AppState>>,
-    Path((group_id, cid)): Path<(Uuid, Uuid)>,
-    CurrentUser { athlete_id }: CurrentUser,
-) -> Result<StatusCode, (StatusCode, String)> {
-    require_owner(&state.db, group_id, athlete_id).await?;
+    Path((_, cid)): Path<(Uuid, Uuid)>,
+    GroupOwner { group_id, .. }: GroupOwner,
+) -> AppResult<StatusCode> {
     let result = sqlx::query!(
         "DELETE FROM segment_challenges WHERE id = $1 AND group_id = $2",
         cid,
         group_id,
     )
     .execute(&state.db)
-    .await
-    .map_err(internal)?;
+    .await?;
     if result.rows_affected() == 0 {
-        return Err((StatusCode::NOT_FOUND, "challenge not found".into()));
+        return Err(AppError::NotFound("challenge not found"));
     }
     Ok(StatusCode::NO_CONTENT)
-}
-
-async fn require_member(
-    db: &PgPool,
-    group_id: Uuid,
-    athlete_id: i64,
-) -> Result<(), (StatusCode, String)> {
-    let is_member = sqlx::query_scalar!(
-        "SELECT EXISTS(SELECT 1 FROM group_members WHERE group_id = $1 AND athlete_id = $2)",
-        group_id,
-        athlete_id
-    )
-    .fetch_one(db)
-    .await
-    .map_err(internal)?
-    .unwrap_or(false);
-
-    if !is_member {
-        return Err((StatusCode::FORBIDDEN, "not a member of this group".into()));
-    }
-    Ok(())
-}
-
-fn internal(e: impl std::fmt::Display) -> (StatusCode, String) {
-    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
 }

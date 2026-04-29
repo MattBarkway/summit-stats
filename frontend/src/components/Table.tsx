@@ -30,18 +30,18 @@ export default function DataTable<TData>({
   const perPage = data?.length || 10;
 
   return (
-    <div className="overflow-x-auto rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl">
+    <div className="overflow-x-auto rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20">
       <table className="w-full text-left table-auto">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr
               key={headerGroup.id}
-              className="border-b border-white/30 bg-white/20"
+              className="border-b border-white/10 bg-white/5"
             >
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="py-3 px-4 text-gray-700 font-medium text-xs uppercase tracking-wide"
+                  className="py-3 px-4 text-slate-400 font-medium text-xs uppercase tracking-widest"
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -60,7 +60,7 @@ export default function DataTable<TData>({
                   {columns.map((_col, colIdx) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder cells have no stable identity
                     <td key={`skeleton-${idx}-${colIdx}`} className="p-3">
-                      <div className="h-5 bg-white/40 rounded w-full" />
+                      <div className="h-5 bg-white/10 rounded w-full" />
                     </td>
                   ))}
                 </tr>
@@ -69,7 +69,7 @@ export default function DataTable<TData>({
                 <tr
                   key={row.id}
                   className={clsx(
-                    "border-b border-white/20 last:border-0 hover:bg-white/30 transition-colors",
+                    "border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors",
                     onRowClick && "cursor-pointer",
                     { "opacity-70": loading },
                   )}
@@ -78,7 +78,7 @@ export default function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="py-3 px-4 text-gray-800 text-sm"
+                      className="py-3 px-4 text-slate-100 text-sm"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

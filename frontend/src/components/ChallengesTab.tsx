@@ -37,25 +37,25 @@ function ChallengeCard({
 }) {
   const ended = !!c.resolved_at || new Date(c.ends_at) <= new Date();
   return (
-    <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5 space-y-3">
+    <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 shadow-md p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate inline-flex items-center gap-2">
+          <h3 className="font-bold tracking-tight text-slate-100 truncate inline-flex items-center gap-2">
             <Trophy
               size={16}
               strokeWidth={2.5}
-              className="text-[#3e7f6b] shrink-0"
+              className="text-amber-400 shrink-0"
               aria-hidden="true"
             />
             {c.segment_name}
           </h3>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-xs text-slate-400">
             {ended ? "Ended" : timeLeft(c.ends_at)} ·{" "}
             <a
               href={`https://www.strava.com/segments/${c.segment_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-0.5 hover:text-[#3e7f6b]"
+              className="inline-flex items-center gap-0.5 hover:text-orange-300"
             >
               Strava
               <ExternalLink size={10} strokeWidth={2.5} aria-hidden="true" />
@@ -63,14 +63,14 @@ function ChallengeCard({
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="rounded-full bg-amber-100/70 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+          <span className="rounded-full bg-amber-500/20 ring-1 ring-amber-400/40 px-2.5 py-0.5 text-xs font-bold tabular-nums text-amber-300">
             🥇 {c.points_winner}
           </span>
           {isOwner && (
             <button
               type="button"
               onClick={onDelete}
-              className="rounded-md p-1.5 text-red-600 hover:bg-red-50"
+              className="rounded-md p-1.5 text-red-400 hover:bg-red-500/10"
               title="Delete challenge"
             >
               <Trash2 size={14} />
@@ -84,9 +84,9 @@ function ChallengeCard({
           {c.results.map((r) => (
             <li
               key={r.athlete_id}
-              className="flex items-center gap-3 rounded-lg bg-white/30 px-3 py-1.5"
+              className="flex items-center gap-3 rounded-lg bg-white/5 ring-1 ring-white/5 px-3 py-1.5"
             >
-              <span className="w-6 text-sm font-semibold text-gray-700">
+              <span className="w-6 text-sm font-bold tabular-nums text-slate-300">
                 {r.rank ?? "–"}
               </span>
               {r.profile_url ? (
@@ -94,22 +94,22 @@ function ChallengeCard({
                 <img
                   src={r.profile_url}
                   alt={nameOf(r)}
-                  className="h-7 w-7 rounded-full object-cover ring-1 ring-white/40"
+                  className="h-7 w-7 rounded-full object-cover ring-1 ring-white/20"
                 />
               ) : (
-                <div className="h-7 w-7 rounded-full bg-white/40" />
+                <div className="h-7 w-7 rounded-full bg-white/10" />
               )}
-              <span className="flex-1 text-sm text-gray-800 truncate">
+              <span className="flex-1 text-sm text-slate-200 truncate">
                 {nameOf(r)}
               </span>
-              <span className="text-sm font-mono text-gray-700">
+              <span className="text-sm font-mono tabular-nums text-slate-300">
                 {formatTime(r.best_time_s)}
               </span>
             </li>
           ))}
         </ol>
       ) : (
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-400">
           No efforts logged yet. Ride the segment to enter.
         </p>
       )}
@@ -129,7 +129,7 @@ export default function ChallengesTab({
   const [createOpen, setCreateOpen] = useState(false);
 
   if (isLoading) {
-    return <p className="text-gray-700">Loading challenges…</p>;
+    return <p className="text-slate-400">Loading challenges…</p>;
   }
   if (error) {
     return (
@@ -144,14 +144,14 @@ export default function ChallengesTab({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-slate-400 tabular-nums">
           {data?.length ?? 0} challenge{data?.length === 1 ? "" : "s"}
         </p>
         {isOwner && (
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="inline-flex items-center gap-1 rounded-lg bg-[#3e7f6b]/80 px-3 py-1.5 text-sm text-white hover:bg-[#358d73] transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg bg-orange-400 px-3 py-1.5 text-sm font-bold text-slate-950 hover:bg-orange-500 transition-colors"
           >
             <Plus size={14} />
             New challenge
@@ -175,7 +175,7 @@ export default function ChallengesTab({
           ))}
         </ul>
       ) : (
-        <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5 text-center text-gray-700">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5 text-center text-slate-400">
           No challenges yet.{" "}
           {isOwner ? "Pick a segment, set a deadline, race." : ""}
         </div>

@@ -16,15 +16,23 @@ export default function ActivityMap({ points }: { points: LatLng[] }) {
       const L = (await import("leaflet")).default;
       if (cancelled || !containerRef.current) return;
 
-      const map = L.map(containerRef.current).setView(points[0], 13);
+      const map = L.map(containerRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+      }).setView(points[0], 13);
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
-      }).addTo(map);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution: "© OpenStreetMap · CARTO",
+          subdomains: "abcd",
+          maxZoom: 20,
+        },
+      ).addTo(map);
 
       const polyline = L.polyline(points, {
-        color: "#f97316",
+        color: "#fb923c",
         weight: 4,
       }).addTo(map);
       map.fitBounds(polyline.getBounds());
@@ -38,5 +46,5 @@ export default function ActivityMap({ points }: { points: LatLng[] }) {
     };
   }, [points]);
 
-  return <div ref={containerRef} className="h-96 w-full rounded-lg" />;
+  return <div ref={containerRef} className="h-96 w-full rounded-xl" />;
 }

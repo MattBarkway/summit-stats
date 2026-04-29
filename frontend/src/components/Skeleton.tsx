@@ -9,7 +9,7 @@ export function SkeletonLine({
 }) {
   return (
     <div
-      className={`rounded bg-white/40 animate-pulse ${className}`}
+      className={`rounded bg-white/10 animate-pulse ${className}`}
       style={{ width, height }}
     />
   );
@@ -24,7 +24,7 @@ export function SkeletonCircle({
 }) {
   return (
     <div
-      className={`rounded-full bg-white/40 animate-pulse ${className}`}
+      className={`rounded-full bg-white/10 animate-pulse ${className}`}
       style={{ width: size, height: size }}
     />
   );
@@ -39,7 +39,7 @@ export function SkeletonCard({
 }) {
   return (
     <div
-      className={`rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-5 ${className}`}
+      className={`rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-5 ${className}`}
     >
       {children}
     </div>
@@ -61,7 +61,7 @@ export function GroupCardSkeleton() {
 
 export function FeedEntrySkeleton() {
   return (
-    <li className="flex items-start gap-3 rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md px-4 py-3">
+    <li className="flex items-start gap-3 rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md px-4 py-3">
       <SkeletonCircle size={40} />
       <div className="flex-1 space-y-2 pt-1">
         <SkeletonLine width="70%" />
@@ -74,7 +74,7 @@ export function FeedEntrySkeleton() {
 
 export function HeaderSkeleton() {
   return (
-    <header className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
+    <header className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl p-6">
       <SkeletonLine width="40%" height="1.875rem" />
       <SkeletonLine width="65%" height="0.875rem" className="mt-2" />
       <SkeletonLine width="55%" height="0.75rem" className="mt-3" />
@@ -84,7 +84,7 @@ export function HeaderSkeleton() {
 
 export function StatBoxSkeleton() {
   return (
-    <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-4">
+    <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-4">
       <SkeletonLine width="50%" height="0.625rem" />
       <SkeletonLine width="80%" height="1.25rem" className="mt-2 mx-auto" />
     </div>

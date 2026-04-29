@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
 import BadgeWall from "@/components/BadgeWall";
+import CountUp from "@/components/CountUp";
 import CyclePill from "@/components/CyclePill";
 import ErrorState from "@/components/ErrorState";
 import FeedList from "@/components/FeedList";
@@ -22,14 +23,14 @@ export default function MemberDetailPage({
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5 fade-up">
         <HeaderSkeleton />
       </main>
     );
   }
   if (error) {
     return (
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 fade-up">
         <ErrorState
           title="Couldn't load this member"
           message={(error as Error).message}
@@ -45,35 +46,41 @@ export default function MemberDetailPage({
     `Athlete ${data.athlete_id}`;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5">
+    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-5 fade-up">
       <Link
         href={`/groups/${id}`}
-        className="inline-flex items-center gap-1 text-sm text-gray-700 hover:text-gray-900"
+        className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-100"
       >
         <ArrowLeft size={14} />
         {group?.name ?? "Back to group"}
       </Link>
 
-      <header className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
+      <header className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-6">
         <div className="flex items-center gap-4">
           {data.profile_url ? (
             // biome-ignore lint/performance/noImgElement: Strava-hosted avatar URL
             <img
               src={data.profile_url}
               alt={name}
-              className="h-16 w-16 rounded-full object-cover ring-2 ring-white/50"
+              className="h-16 w-16 rounded-full object-cover ring-2 ring-white/20"
             />
           ) : (
-            <div className="h-16 w-16 rounded-full bg-white/40" />
+            <div className="h-16 w-16 rounded-full bg-white/10" />
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 truncate">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-100 truncate">
               {name}
             </h1>
-            <p className="mt-1 text-sm text-gray-700">
+            <p className="mt-1 text-sm text-slate-400">
               Rank{" "}
-              <span className="font-semibold text-gray-900">#{data.rank}</span>{" "}
-              · {data.points.toLocaleString()} pts · {data.activity_count}{" "}
+              <span className="font-bold tabular-nums text-slate-100">
+                #{data.rank}
+              </span>{" "}
+              ·{" "}
+              <span className="tabular-nums">
+                {data.points.toLocaleString()}
+              </span>{" "}
+              pts · <span className="tabular-nums">{data.activity_count}</span>{" "}
               activit
               {data.activity_count === 1 ? "y" : "ies"}
             </p>
@@ -83,27 +90,49 @@ export default function MemberDetailPage({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Points" value={data.points.toLocaleString()} />
-          <Stat label="Rank" value={`#${data.rank}`} />
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Stat label="Points" valueNode={<CountUp value={data.points} />} />
+          <Stat
+            label="Rank"
+            valueNode={
+              <>
+                #<CountUp value={data.rank} />
+              </>
+            }
+          />
           <Stat
             label="Distance"
-            value={`${(data.total_distance_m / 1000).toFixed(1)} km`}
+            valueNode={
+              <>
+                <CountUp
+                  value={data.total_distance_m / 1000}
+                  format={(n) => n.toFixed(1)}
+                />{" "}
+                <span className="text-slate-400 text-sm">km</span>
+              </>
+            }
           />
           <Stat
             label="Elevation"
-            value={`${Math.round(data.total_elevation_m)} m`}
+            valueNode={
+              <>
+                <CountUp value={Math.round(data.total_elevation_m)} />{" "}
+                <span className="text-slate-400 text-sm">m</span>
+              </>
+            }
           />
         </div>
       </header>
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold text-gray-900">Badges</h2>
+        <h2 className="mb-3 text-xl font-bold tracking-tight text-slate-100">
+          Badges
+        </h2>
         <BadgeWall badges={data.badges} />
       </section>
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold text-gray-900">
+        <h2 className="mb-3 text-xl font-bold tracking-tight text-slate-100">
           Events earned
         </h2>
         <FeedList data={data.events} />
@@ -112,11 +141,21 @@ export default function MemberDetailPage({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  valueNode,
+}: {
+  label: string;
+  valueNode: React.ReactNode;
+}) {
   return (
-    <div className="rounded-xl bg-white/40 px-3 py-2 text-center">
-      <p className="text-xs uppercase tracking-wide text-gray-600">{label}</p>
-      <p className="mt-0.5 text-base font-semibold text-gray-900">{value}</p>
+    <div className="rounded-xl bg-white/5 ring-1 ring-white/10 px-3 py-2.5 text-center">
+      <p className="text-xs uppercase tracking-widest text-slate-500">
+        {label}
+      </p>
+      <p className="mt-0.5 text-lg font-extrabold tabular-nums tracking-tight text-slate-100 font-mono">
+        {valueNode}
+      </p>
     </div>
   );
 }

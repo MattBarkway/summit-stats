@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,30 +21,57 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/40 backdrop-blur-xl shadow-xl p-8 text-center">
-        <div className="mb-4 flex justify-center">
-          <Image
-            src="/favicon-large.png"
-            alt="SummitStats logo"
-            width={88}
-            height={88}
-          />
-        </div>
-        <h1 className="text-3xl font-semibold text-gray-900">
-          <span className="text-[#3e7f6b]">Summit</span>Stats
-        </h1>
-        <p className="mt-3 text-gray-700">
-          Group challenges and leaderboards from your Strava activities.
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-20">
+      <section className="text-center fade-up">
+        <p className="inline-block rounded-full bg-white/5 ring-1 ring-white/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-slate-300 mb-6">
+          Group · Compete · Win
         </p>
-        <button
-          type="button"
-          onClick={handleConnect}
-          className="mt-6 w-full py-3 rounded-lg bg-[#3e7f6b]/80 text-white font-medium hover:bg-[#358d73] transition-colors duration-200"
-        >
-          Connect with Strava
-        </button>
-      </div>
+        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-slate-100">
+          <span className="bg-gradient-to-r from-orange-400 via-orange-300 to-amber-300 bg-clip-text text-transparent">
+            Summit
+          </span>
+          Stats
+        </h1>
+        <p className="mt-6 text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto">
+          Group challenges, leaderboards, and bragging rights — pulled live from
+          your Strava activities.
+        </p>
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={handleConnect}
+            className="group inline-flex items-center gap-2 rounded-xl bg-orange-400 px-7 py-4 text-base font-bold text-slate-950 shadow-lg shadow-orange-500/30 hover:bg-orange-500 hover:shadow-orange-500/50 transition-all"
+          >
+            Connect with Strava
+            <ChevronRight
+              size={18}
+              strokeWidth={2.5}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
+          </button>
+        </div>
+      </section>
+
+      <section className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          { label: "Cycle", value: "monthly", suffix: "" },
+          { label: "Sports", value: "10+", suffix: "" },
+          { label: "Friction", value: "0", suffix: "" },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-6 text-center"
+          >
+            <p className="text-xs uppercase tracking-widest text-slate-500">
+              {stat.label}
+            </p>
+            <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight text-slate-100">
+              {stat.value}
+              <span className="text-orange-400">{stat.suffix}</span>
+            </p>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }

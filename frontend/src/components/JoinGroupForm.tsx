@@ -25,12 +25,12 @@ export default function JoinGroupForm() {
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Invite code"
-        className="flex-1 rounded-md p-3 bg-gray-100/60 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#558d73] text-gray-700 font-mono text-sm"
+        className="flex-1 rounded-md p-3 bg-white/5 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400 text-slate-100 placeholder:text-slate-500 font-mono text-sm"
       />
       <button
         type="submit"
         disabled={join.isPending}
-        className="rounded-lg bg-[#3e7f6b]/80 px-5 text-white hover:bg-[#358d73] disabled:opacity-50 transition-colors duration-200"
+        className="rounded-lg bg-orange-400 px-5 text-slate-950 font-bold hover:bg-orange-500 disabled:opacity-50 transition-colors duration-200"
       >
         {join.isPending ? "Joining..." : "Join"}
       </button>

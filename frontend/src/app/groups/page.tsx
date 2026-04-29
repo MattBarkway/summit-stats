@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import CreateGroupModal from "@/components/CreateGroupModal";
@@ -23,21 +24,24 @@ export default function GroupsPage() {
   if (authLoading || !user) return null;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6">
-      <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6 fade-up">
+      <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-6">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <h1 className="text-3xl font-semibold text-gray-900">My Groups</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-100">
+            My Groups
+          </h1>
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="rounded-lg bg-[#3e7f6b]/80 px-4 py-2 font-medium text-white hover:bg-[#358d73] transition-colors duration-200"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-400 px-4 py-2 font-bold text-slate-950 hover:bg-orange-500 transition-colors duration-200"
           >
-            + Create Group
+            <Plus size={16} strokeWidth={3} />
+            Create Group
           </button>
         </div>
 
         <section>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
             Join with invite code
           </h2>
           <JoinGroupForm />
@@ -65,8 +69,8 @@ export default function GroupsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6 text-center">
-            <p className="text-gray-700">
+          <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-6 text-center">
+            <p className="text-slate-400">
               No groups yet. Create one or join with an invite code.
             </p>
           </div>
