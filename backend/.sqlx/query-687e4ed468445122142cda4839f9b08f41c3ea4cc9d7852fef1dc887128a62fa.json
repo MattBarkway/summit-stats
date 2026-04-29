@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, trigger_type::text AS \"trigger_type!\", threshold, points, sport_type\n        FROM point_rules\n        WHERE group_id = $1\n        ORDER BY trigger_type, threshold\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "trigger_type!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "threshold",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "points",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "sport_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "687e4ed468445122142cda4839f9b08f41c3ea4cc9d7852fef1dc887128a62fa"
+}

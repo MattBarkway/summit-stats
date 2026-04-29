@@ -31,7 +31,7 @@ where
             .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "client init failed"))?;
 
         client
-            .ensure_token(&state.client_id, &state.client_secret)
+            .ensure_token(state.client_id, &state.client_secret)
             .await
             .map_err(|_| (StatusCode::UNAUTHORIZED, "token refresh failed"))?;
 

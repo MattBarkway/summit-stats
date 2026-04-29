@@ -1,69 +1,95 @@
 use crate::AppState;
-use crate::models::api::auth::TokenResponse;
+use crate::extractors::current_user::CurrentUser;
 use axum::extract::State;
 use axum::{
     Json, Router,
     extract::Query,
-    response::{Html, Redirect},
-    routing::get,
+    response::Redirect,
+    routing::{get, post},
 };
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use serde::Deserialize;
 use std::sync::Arc;
+use strava_wrapper::api::StravaAPI;
+use strava_wrapper::auth;
+use strava_wrapper::query::Sendable;
 use tower_sessions::Session;
 
 pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
         .route("/strava", get(start_oauth))
         .route("/strava/callback", get(callback))
+        .route("/strava/deauth", post(deauth))
 }
 
-async fn start_oauth(State(state): State<Arc<AppState>>) -> Redirect {
+#[derive(Deserialize)]
+struct StartOAuthQuery {
+    next: Option<String>,
+}
+
+async fn start_oauth(
+    State(state): State<Arc<AppState>>,
+    Query(params): Query<StartOAuthQuery>,
+    session: Session,
+) -> Result<Redirect, String> {
     tracing::info!("Starting OAUTH");
+
+    // Stash post-auth destination if it's a safe relative path.
+    if let Some(next) = params.next.as_deref() {
+        if next.starts_with('/') && !next.starts_with("//") {
+            session
+                .insert("post_auth_next", next)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
+    }
+
     let url = format!(
-        "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&approval_prompt=force&scope=read_all,activity:read_all",
-        state.strava_url,
-        state.client_id,
-        format!("{}/auth/strava/callback", state.backend_url)
+        "{}/oauth/authorize?client_id={}&response_type=code&redirect_uri={}/auth/strava/callback&approval_prompt=force&scope=read_all,activity:read_all",
+        state.strava_url, state.client_id, state.backend_url
     );
-    Redirect::to(&url)
+    Ok(Redirect::to(&url))
 }
 
 #[derive(Deserialize)]
 struct CallbackQuery {
     code: String,
+    #[allow(dead_code)]
     scope: Option<String>,
 }
 
 async fn callback(
     State(state): State<Arc<AppState>>,
     Query(params): Query<CallbackQuery>,
-    mut session: Session,
+    session: Session,
 ) -> Result<Redirect, String> {
     tracing::info!("Received OAUTH callback");
-    let client = Client::new();
 
-    let mut form = HashMap::new();
-    form.insert("client_id", state.client_id.clone());
-    form.insert("client_secret", state.client_secret.clone());
-    form.insert("grant_type", "authorization_code".into());
-    form.insert("code", params.code);
+    let token = auth::get_token_at(
+        &format!("{}/oauth/token", &state.strava_url),
+        state.client_id,
+        &state.client_secret,
+        &params.code,
+    )
+    .await
+    .map_err(|e| format!("get_token failed: {:?}", e))?;
 
-    let res = client
-        .post("https://www.strava.com/oauth/token")
-        .form(&form)
+    let api = StravaAPI::new(
+        &format!("{}/api", &state.strava_url),
+        token.access_token.clone(),
+    );
+    let athlete = api
+        .athlete()
+        .get()
         .send()
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("athlete fetch failed: {:?}", e))?;
 
-    if !res.status().is_success() {
-        return Err(format!("Failed to get token: {:?}", res.text().await));
-    }
+    let athlete_id = athlete
+        .id
+        .ok_or_else(|| "athlete id missing from Strava response".to_string())?;
+    let expires_at = token.expires_at as i64;
 
-    let token: TokenResponse = res.json().await.map_err(|e| e.to_string())?;
-
-    tracing::info!("Creating athlete record");
+    tracing::info!("Upserting tokens for athlete {}", athlete_id);
     sqlx::query!(
         r#"
         INSERT INTO tokens (athlete_id, access_token, refresh_token, expires_at)
@@ -73,19 +99,67 @@ async fn callback(
               refresh_token = EXCLUDED.refresh_token,
               expires_at = EXCLUDED.expires_at
         "#,
-        token.athlete.id,
+        athlete_id,
         token.access_token,
         token.refresh_token,
-        token.expires_at,
+        expires_at,
     )
     .execute(&state.db)
     .await
     .map_err(|e| e.to_string())?;
-    tracing::info!("Creating session");
+
+    tracing::info!("Upserting user record");
+    sqlx::query!(
+        r#"
+        INSERT INTO users (athlete_id, firstname, lastname, profile_url)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (athlete_id) DO UPDATE
+          SET firstname = EXCLUDED.firstname,
+              lastname = EXCLUDED.lastname,
+              profile_url = EXCLUDED.profile_url
+        "#,
+        athlete_id,
+        athlete.firstname,
+        athlete.lastname,
+        athlete.profile_medium,
+    )
+    .execute(&state.db)
+    .await
+    .map_err(|e| e.to_string())?;
+
     session
-        .insert("athlete_id", token.athlete.id)
+        .insert("athlete_id", athlete_id)
         .await
         .map_err(|e| e.to_string())?;
-    tracing::info!("Redirecting User");
-    Ok(Redirect::to(&format!("{}/dashboard", &state.frontend_url)))
+
+    let next: Option<String> = session
+        .remove("post_auth_next")
+        .await
+        .map_err(|e| e.to_string())?;
+    let dest = next
+        .filter(|n| n.starts_with('/') && !n.starts_with("//"))
+        .unwrap_or_else(|| "/groups".to_string());
+    tracing::info!("Redirecting user to {}", dest);
+    Ok(Redirect::to(&format!("{}{}", &state.frontend_url, dest)))
+}
+
+async fn deauth(
+    State(state): State<Arc<AppState>>,
+    session: Session,
+    CurrentUser { athlete_id }: CurrentUser,
+) -> Result<Json<serde_json::Value>, String> {
+    let row = sqlx::query!(
+        "SELECT access_token FROM tokens WHERE athlete_id = $1",
+        athlete_id
+    )
+    .fetch_one(&state.db)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    if let Err(e) = auth::deauthorize(&row.access_token).await {
+        tracing::warn!("Strava deauthorize failed (continuing): {:?}", e);
+    }
+
+    session.delete().await.map_err(|e| e.to_string())?;
+    Ok(Json(serde_json::json!({ "ok": true })))
 }

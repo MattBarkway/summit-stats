@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT EXISTS(\n                SELECT 1 FROM activities\n                WHERE athlete_id = $1 AND elevation_m >= 8848\n            ) AS \"ok!\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ok!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fc2abe4ccbaf9205c6be342a7be11e5e6127eeccaca3cf1b23225c76610050fe"
+}

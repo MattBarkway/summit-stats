@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE groups\n        SET\n            name        = COALESCE($2, name),\n            description = CASE WHEN $3::boolean THEN $4 ELSE description END,\n            icon_url    = CASE WHEN $5::boolean THEN $6 ELSE icon_url END\n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool",
+        "Text",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d0c7d92e233958a12d893aa38b87aad55142e7f1c25f444e140b067b878d14ea"
+}

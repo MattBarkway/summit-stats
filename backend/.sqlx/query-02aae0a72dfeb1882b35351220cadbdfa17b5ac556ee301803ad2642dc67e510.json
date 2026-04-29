@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT EXISTS(\n            SELECT 1\n            FROM user_badges ub\n            JOIN badges b ON b.id = ub.badge_id\n            WHERE ub.group_id = $1\n              AND b.slug = 'cycle_winner'\n              AND ub.context->>'cycle_start' = $2::text\n        ) AS \"ok!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ok!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "02aae0a72dfeb1882b35351220cadbdfa17b5ac556ee301803ad2642dc67e510"
+}

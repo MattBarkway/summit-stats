@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  useReactTable,
-  getCoreRowModel,
+  type ColumnDef,
   flexRender,
-  ColumnDef,
+  getCoreRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
 
@@ -30,15 +30,18 @@ export default function DataTable<TData>({
   const perPage = data?.length || 10;
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+    <div className="overflow-x-auto rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl">
       <table className="w-full text-left table-auto">
-        <thead className="bg-gray-50">
+        <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr
+              key={headerGroup.id}
+              className="border-b border-white/30 bg-white/20"
+            >
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="py-3 px-4 text-gray-700 font-medium text-sm uppercase tracking-wide"
+                  className="py-3 px-4 text-gray-700 font-medium text-xs uppercase tracking-wide"
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -49,13 +52,15 @@ export default function DataTable<TData>({
             </tr>
           ))}
         </thead>
-        <tbody className="bg-white">
+        <tbody>
           {loading || !data
             ? Array.from({ length: perPage }).map((_, idx) => (
-                <tr key={idx} className="animate-pulse">
-                  {columns.map((col, colIdx) => (
-                    <td key={`${colIdx}-${idx}`} className="p-3">
-                      <div className="h-5 bg-gray-200 rounded w-full"></div>
+                // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder rows have no stable identity
+                <tr key={`skeleton-${idx}`} className="animate-pulse">
+                  {columns.map((_col, colIdx) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder cells have no stable identity
+                    <td key={`skeleton-${idx}-${colIdx}`} className="p-3">
+                      <div className="h-5 bg-white/40 rounded w-full" />
                     </td>
                   ))}
                 </tr>
@@ -64,7 +69,8 @@ export default function DataTable<TData>({
                 <tr
                   key={row.id}
                   className={clsx(
-                    "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer",
+                    "border-b border-white/20 last:border-0 hover:bg-white/30 transition-colors",
+                    onRowClick && "cursor-pointer",
                     { "opacity-70": loading },
                   )}
                   onClick={() => onRowClick?.(row.original)}

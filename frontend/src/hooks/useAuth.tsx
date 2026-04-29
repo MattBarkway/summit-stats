@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Athlete } from "@/hooks/useAthlete";
 
-async function fetchAuth(): Promise<Athlete | null> {
+export type Me = {
+  id?: number;
+  firstname?: string;
+  lastname?: string;
+  profile?: string;
+  profile_medium?: string;
+};
+
+async function fetchAuth(): Promise<Me | null> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
     credentials: "include",
   });

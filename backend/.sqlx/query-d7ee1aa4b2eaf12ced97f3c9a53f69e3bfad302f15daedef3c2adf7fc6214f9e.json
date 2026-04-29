@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO point_rules (group_id, trigger_type, threshold, points, sport_type)\n        VALUES ($1, $2::text::point_trigger, $3, $4, $5)\n        RETURNING id, trigger_type::text AS \"trigger_type!\", threshold, points, sport_type\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "trigger_type!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "threshold",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "points",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "sport_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Float8",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "d7ee1aa4b2eaf12ced97f3c9a53f69e3bfad302f15daedef3c2adf7fc6214f9e"
+}

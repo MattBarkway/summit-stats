@@ -18,13 +18,14 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 pub mod extractors;
 pub mod models;
 pub mod routes;
+pub mod services;
 pub mod utilities;
 
 #[derive(Clone)]
 pub struct AppState {
     pub db: sqlx::PgPool,
     pub strava_url: String,
-    pub client_id: String,
+    pub client_id: u32,
     pub client_secret: String,
     pub backend_url: String,
     pub frontend_url: String,
@@ -42,10 +43,11 @@ async fn main() {
     }
     dotenv::dotenv().ok();
 
-    let client_id = std::env::var("CLIENT_ID")
+    let client_id: u32 = std::env::var("CLIENT_ID")
         .expect("CLIENT_ID must be set")
         .trim()
-        .to_string();
+        .parse()
+        .expect("CLIENT_ID must be a valid u32");
     tracing::info!("Got CLIENT_ID...");
     let client_secret = std::env::var("CLIENT_SECRET")
         .expect("CLIENT_SECRET must be set")
@@ -89,7 +91,13 @@ async fn main() {
 
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
-        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PATCH,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
         .allow_headers([CONTENT_TYPE])
         .allow_credentials(true);
 
@@ -111,12 +119,32 @@ async fn main() {
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
 
-    let session_layer = SessionManagerLayer::new(session_store)
-        .with_secure(true)
-        .with_same_site(SameSite::None)
+    let cookie_secure = std::env::var("COOKIE_SECURE")
+        .map(|v| v.trim().eq_ignore_ascii_case("true"))
+        .unwrap_or(true);
+    let cookie_same_site = match std::env::var("COOKIE_SAME_SITE")
+        .unwrap_or_else(|_| "none".into())
+        .trim()
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "lax" => SameSite::Lax,
+        "strict" => SameSite::Strict,
+        _ => SameSite::None,
+    };
+    let cookie_domain = std::env::var("COOKIE_DOMAIN")
+        .ok()
+        .map(|d| d.trim().to_string())
+        .filter(|d| !d.is_empty());
+
+    let mut session_layer = SessionManagerLayer::new(session_store)
+        .with_secure(cookie_secure)
+        .with_same_site(cookie_same_site)
         .with_name("summit_stats_session")
-        .with_domain(".summit-stats.co.uk")
         .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
+    if let Some(domain) = cookie_domain {
+        session_layer = session_layer.with_domain(domain);
+    }
 
     let state = Arc::new(AppState {
         db: pool,

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users (athlete_id, firstname, lastname, profile_url)\n        VALUES ($1, $2, $3, $4)\n        ON CONFLICT (athlete_id) DO UPDATE\n          SET firstname = EXCLUDED.firstname,\n              lastname = EXCLUDED.lastname,\n              profile_url = EXCLUDED.profile_url\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6754bb995b7ebd6be7b3a6b156ea0df46d5b217094e223f0f05bca478d42e6f7"
+}

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO user_badges (athlete_id, badge_id, group_id, context)\n        SELECT $1, b.id, $3, $4\n        FROM badges b\n        WHERE b.slug = $2\n        ON CONFLICT DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c9876f83111c00593002cf1815dfb4452774a883cf429117e1dac886cde4451a"
+}

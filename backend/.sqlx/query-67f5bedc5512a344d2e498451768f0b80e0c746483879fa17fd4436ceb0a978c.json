@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH live AS (\n            SELECT g.cycle_type, cb.start_at AS curr_start\n            FROM groups g\n            CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n            WHERE g.id = $1\n        )\n        SELECT\n            cycle_type::text AS \"cycle_type!\",\n            curr_start       AS \"curr_start!\",\n            CASE cycle_type\n                WHEN 'weekly'    THEN curr_start - INTERVAL '7 days'\n                WHEN 'monthly'   THEN curr_start - INTERVAL '1 month'\n                WHEN 'quarterly' THEN curr_start - INTERVAL '3 months'\n                WHEN 'yearly'    THEN curr_start - INTERVAL '1 year'\n                WHEN 'all_time'  THEN '1970-01-01'::timestamptz\n            END AS \"prev_start!\"\n        FROM live\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cycle_type!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "curr_start!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "prev_start!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "67f5bedc5512a344d2e498451768f0b80e0c746483879fa17fd4436ceb0a978c"
+}

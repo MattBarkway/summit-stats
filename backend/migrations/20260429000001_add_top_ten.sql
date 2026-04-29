@@ -1,0 +1,4 @@
+ALTER TABLE activities
+    ADD COLUMN has_top_ten BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TYPE point_trigger ADD VALUE IF NOT EXISTS 'top_ten';

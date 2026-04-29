@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const { data: user, isLoading } = useAuth();
@@ -10,45 +10,41 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push("/dashboard");
+      router.push("/groups");
     }
   }, [isLoading, user, router]);
 
   if (isLoading || user) return null;
+
   const handleConnect = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/strava`;
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
-      <div className="mb-6">
-        <Image
-          src="/favicon-large.png"
-          alt="SummitStats logo"
-          width={100}
-          height={100}
-        />
+    <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white/40 backdrop-blur-xl shadow-xl p-8 text-center">
+        <div className="mb-4 flex justify-center">
+          <Image
+            src="/favicon-large.png"
+            alt="SummitStats logo"
+            width={88}
+            height={88}
+          />
+        </div>
+        <h1 className="text-3xl font-semibold text-gray-900">
+          <span className="text-[#3e7f6b]">Summit</span>Stats
+        </h1>
+        <p className="mt-3 text-gray-700">
+          Group challenges and leaderboards from your Strava activities.
+        </p>
+        <button
+          type="button"
+          onClick={handleConnect}
+          className="mt-6 w-full py-3 rounded-lg bg-[#3e7f6b]/80 text-white font-medium hover:bg-[#358d73] transition-colors duration-200"
+        >
+          Connect with Strava
+        </button>
       </div>
-
-      <h1 className="text-4xl font-bold mb-6 text-gray-700">
-        Welcome to
-        <span className={"font-light text-orange-500 font-stretch-150%"}>
-          {" "}
-          Summit
-        </span>
-        <span className={"font-light text-emerald-600 font-stretch-150%"}>
-          Stats
-        </span>
-      </h1>
-      <p className="text-lg text-gray-600 mb-8">
-        Connect with Strava to see your personalized activity dashboard.
-      </p>
-      <button
-        onClick={handleConnect}
-        className="px-6 py-3 rounded-xl bg-orange-500 text-white font-semibold hover:bg-orange-600 transition"
-      >
-        Connect with Strava
-      </button>
     </main>
   );
 }

@@ -1,0 +1,108 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { use } from "react";
+import ErrorState from "@/components/ErrorState";
+import {
+  HeaderSkeleton,
+  SkeletonLine,
+  StatBoxSkeleton,
+} from "@/components/Skeleton";
+import { useActivity } from "@/hooks/useActivity";
+
+const ActivityMap = dynamic(() => import("@/components/ActivityMap"), {
+  ssr: false,
+});
+
+export default function ActivityDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+  const { data, isLoading, error, refetch } = useActivity(id);
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6">
+        <HeaderSkeleton />
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders have no stable identity
+            <StatBoxSkeleton key={`stat-skel-${i}`} />
+          ))}
+        </section>
+        <section className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-3">
+          <SkeletonLine width="100%" height="24rem" />
+        </section>
+      </main>
+    );
+  }
+  if (error) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+        <ErrorState
+          title="Couldn't load this activity"
+          message={(error as Error).message}
+          onRetry={() => refetch()}
+        />
+      </main>
+    );
+  }
+  if (!data) return null;
+
+  const { activity, streams } = data;
+  const points = streams.latlng?.data ?? [];
+
+  return (
+    <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 space-y-6">
+      <header className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-6">
+        <h1 className="text-3xl font-semibold text-gray-900">
+          {activity.name}
+        </h1>
+        <p className="mt-1 text-gray-700">
+          {activity.sport_type} ·{" "}
+          {new Date(activity.start_date).toLocaleString()}
+        </p>
+      </header>
+
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat
+          label="Distance"
+          value={`${(activity.distance / 1000).toFixed(2)} km`}
+        />
+        <Stat
+          label="Moving Time"
+          value={formatDuration(activity.moving_time)}
+        />
+        <Stat
+          label="Elevation"
+          value={`${Math.round(activity.total_elevation_gain)} m`}
+        />
+        <Stat label="Achievements" value={String(activity.achievement_count)} />
+      </section>
+
+      {points.length > 0 && (
+        <section className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-xl p-3">
+          <ActivityMap points={points} />
+        </section>
+      )}
+    </main>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-gray-100/40 backdrop-blur-xl shadow-md p-4 text-center">
+      <p className="text-xs uppercase tracking-wide text-gray-600">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-gray-900">{value}</p>
+    </div>
+  );
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
+}

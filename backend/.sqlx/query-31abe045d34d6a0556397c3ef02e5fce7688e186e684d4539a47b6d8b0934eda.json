@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET last_synced_at = NOW() WHERE athlete_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "31abe045d34d6a0556397c3ef02e5fce7688e186e684d4539a47b6d8b0934eda"
+}

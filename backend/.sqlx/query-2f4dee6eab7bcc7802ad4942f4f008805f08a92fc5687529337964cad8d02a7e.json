@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, segment_id, starts_at, ends_at,\n               points_winner, points_top3, points_finish\n        FROM segment_challenges\n        WHERE group_id = $1 AND ends_at < NOW() AND resolved_at IS NULL\n        ORDER BY ends_at\n        LIMIT $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "segment_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "starts_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "ends_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "points_winner",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "points_top3",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "points_finish",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "2f4dee6eab7bcc7802ad4942f4f008805f08a92fc5687529337964cad8d02a7e"
+}

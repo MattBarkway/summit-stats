@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, segment_id, segment_name, starts_at, ends_at,\n               points_winner, points_top3, points_finish, resolved_at\n        FROM segment_challenges\n        WHERE group_id = $1\n        ORDER BY ends_at DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "segment_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "segment_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "starts_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "ends_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "points_winner",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "points_top3",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "points_finish",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "resolved_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "81a8abe35fa31e505c5927b8568c3d2797d19391036739d3477720a8d4567478"
+}

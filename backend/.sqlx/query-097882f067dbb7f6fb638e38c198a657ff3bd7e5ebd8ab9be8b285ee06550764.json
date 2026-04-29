@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM group_members WHERE group_id = $1 AND athlete_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "097882f067dbb7f6fb638e38c198a657ff3bd7e5ebd8ab9be8b285ee06550764"
+}

@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            u.athlete_id,\n            u.firstname,\n            u.lastname,\n            u.profile_url,\n            COALESCE(SUM(ep.points) FILTER (\n                WHERE COALESCE(a.start_date, ep.earned_at) >= $3\n                  AND COALESCE(a.start_date, ep.earned_at) <  $4\n            ), 0)::bigint AS \"points!\",\n            COUNT(DISTINCT ep.activity_id) FILTER (\n                WHERE COALESCE(a.start_date, ep.earned_at) >= $3\n                  AND COALESCE(a.start_date, ep.earned_at) <  $4\n            )::bigint AS \"activity_count!\",\n            COALESCE(SUM(DISTINCT a.distance_m), 0)::double precision  AS \"total_distance_m!\",\n            COALESCE(SUM(DISTINCT a.elevation_m), 0)::double precision AS \"total_elevation_m!\"\n        FROM users u\n        LEFT JOIN earned_points ep\n          ON ep.group_id = $1 AND ep.athlete_id = u.athlete_id\n        LEFT JOIN activities a\n          ON a.id = ep.activity_id\n        WHERE u.athlete_id = $2\n        GROUP BY u.athlete_id, u.firstname, u.lastname, u.profile_url\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "athlete_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "firstname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "lastname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "profile_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "points!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "activity_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "total_distance_m!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "total_elevation_m!",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "16b4396978838e8133851ad8492c9b8d74d759ea2d2394918dc0e07cad78397d"
+}

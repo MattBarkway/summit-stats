@@ -1,7 +1,7 @@
 "use client";
 
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/Table";
 
 interface PaginatedTableProps<TData> {
@@ -43,6 +43,7 @@ export default function PaginatedTable<TData>({
 
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
+          type="button"
           onClick={handlePrev}
           disabled={page === 1}
           className="px-3 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
@@ -55,6 +56,7 @@ export default function PaginatedTable<TData>({
         </span>
 
         <button
+          type="button"
           onClick={handleNext}
           className="px-3 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100"
         >

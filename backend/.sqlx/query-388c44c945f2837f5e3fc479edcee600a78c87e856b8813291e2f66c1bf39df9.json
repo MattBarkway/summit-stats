@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            g.name,\n            g.icon_url,\n            g.cycle_type::text AS \"cycle_type!\",\n            cb.start_at        AS \"cycle_start!\",\n            cb.end_at          AS \"cycle_end!\",\n            (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) AS \"member_count!\",\n            COALESCE(\n                NULLIF(TRIM(BOTH ' ' FROM CONCAT_WS(' ', u.firstname, u.lastname)), ''),\n                'Group owner'\n            ) AS \"owner_name!\"\n        FROM groups g\n        CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n        JOIN users u ON u.athlete_id = g.owner_id\n        WHERE g.invite_code = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "icon_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "cycle_type!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "cycle_start!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "cycle_end!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "member_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "owner_name!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "388c44c945f2837f5e3fc479edcee600a78c87e856b8813291e2f66c1bf39df9"
+}

@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT 1 + COUNT(*)::bigint AS \"rank!\"\n        FROM (\n            SELECT ep.athlete_id, COALESCE(SUM(ep.points), 0) AS pts\n            FROM earned_points ep\n            LEFT JOIN activities a ON a.id = ep.activity_id\n            WHERE ep.group_id = $1\n              AND COALESCE(a.start_date, ep.earned_at) >= $3\n              AND COALESCE(a.start_date, ep.earned_at) <  $4\n            GROUP BY ep.athlete_id\n        ) totals\n        WHERE totals.pts > $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rank!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9d34ef53ef22e6732bd5f35be740ecc2760161d03a7602b44ea7835bff0ce27b"
+}
