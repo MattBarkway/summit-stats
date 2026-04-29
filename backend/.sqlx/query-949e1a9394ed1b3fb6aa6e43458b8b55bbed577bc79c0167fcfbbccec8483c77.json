@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO point_rules (group_id, trigger_type, threshold, points, sport_type)\n        VALUES ($1, $2, $3, $4, $5)\n        RETURNING id, trigger_type AS \"trigger_type!: TriggerType\", threshold, points, sport_type\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "trigger_type!: TriggerType",
+        "type_info": {
+          "Custom": {
+            "name": "point_trigger",
+            "kind": {
+              "Enum": [
+                "distance_km",
+                "elevation_m",
+                "kom",
+                "achievement",
+                "top_ten",
+                "segment_challenge"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "threshold",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "points",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "sport_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "point_trigger",
+            "kind": {
+              "Enum": [
+                "distance_km",
+                "elevation_m",
+                "kom",
+                "achievement",
+                "top_ten",
+                "segment_challenge"
+              ]
+            }
+          }
+        },
+        "Float8",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "949e1a9394ed1b3fb6aa6e43458b8b55bbed577bc79c0167fcfbbccec8483c77"
+}

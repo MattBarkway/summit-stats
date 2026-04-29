@@ -18,7 +18,8 @@ pub fn routes() -> Router<Arc<AppState>> {
     Router::new()
         .route("/strava", get(start_oauth))
         .route("/strava/callback", get(callback))
-        .route("/strava/deauth", post(deauth))
+        .route("/strava/signout", post(signout))
+        .route("/strava/disconnect", post(disconnect))
 }
 
 #[derive(Deserialize)]
@@ -143,7 +144,18 @@ async fn callback(
     Ok(Redirect::to(&format!("{}{}", &state.frontend_url, dest)))
 }
 
-async fn deauth(
+/// Friendly logout — clears the session only. Does not touch any data.
+async fn signout(session: Session) -> Result<Json<serde_json::Value>, String> {
+    session.delete().await.map_err(|e| e.to_string())?;
+    Ok(Json(serde_json::json!({ "ok": true })))
+}
+
+/// Destructive — revokes the Strava token, deletes the tokens row (which
+/// cascades to users → activities, segment_efforts, earned_points, badges,
+/// group memberships, owned groups, challenge ownership), clears the session.
+/// Aligns with Strava API Agreement: all user data deleted within 24h of
+/// access revocation.
+async fn disconnect(
     State(state): State<Arc<AppState>>,
     session: Session,
     CurrentUser { athlete_id }: CurrentUser,
@@ -152,14 +164,21 @@ async fn deauth(
         "SELECT access_token FROM tokens WHERE athlete_id = $1",
         athlete_id
     )
-    .fetch_one(&state.db)
+    .fetch_optional(&state.db)
     .await
     .map_err(|e| e.to_string())?;
 
-    if let Err(e) = auth::deauthorize(&row.access_token).await {
-        tracing::warn!("Strava deauthorize failed (continuing): {:?}", e);
+    if let Some(row) = row {
+        if let Err(e) = auth::deauthorize(&row.access_token).await {
+            tracing::warn!("Strava deauthorize failed (continuing local purge): {:?}", e);
+        }
     }
 
-    session.delete().await.map_err(|e| e.to_string())?;
+    sqlx::query!("DELETE FROM tokens WHERE athlete_id = $1", athlete_id)
+        .execute(&state.db)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    session.delete().await.ok();
     Ok(Json(serde_json::json!({ "ok": true })))
 }

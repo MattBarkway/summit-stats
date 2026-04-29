@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO segment_challenge_progress\n                    (challenge_id, athlete_id, best_time_s, best_at, activity_id)\n                SELECT c.id, $1, $2, $3, $5\n                FROM segment_challenges c\n                WHERE c.segment_id = $4\n                  AND c.resolved_at IS NULL\n                  AND $3 >= c.starts_at AND $3 < c.ends_at\n                ON CONFLICT (challenge_id, athlete_id) DO UPDATE\n                SET best_time_s = LEAST(segment_challenge_progress.best_time_s, EXCLUDED.best_time_s),\n                    best_at = CASE\n                        WHEN EXCLUDED.best_time_s < segment_challenge_progress.best_time_s\n                        THEN EXCLUDED.best_at\n                        ELSE segment_challenge_progress.best_at\n                    END,\n                    activity_id = CASE\n                        WHEN EXCLUDED.best_time_s < segment_challenge_progress.best_time_s\n                        THEN EXCLUDED.activity_id\n                        ELSE segment_challenge_progress.activity_id\n                    END\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Timestamptz",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "903cd0b9a299abef1c0fe46aed43b5ba6dc87219abf178bd94de2e9af817b141"
+}

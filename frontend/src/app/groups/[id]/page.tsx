@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import ActiveChallengesStrip from "@/components/ActiveChallengesStrip";
 import ChallengesTab from "@/components/ChallengesTab";
 import CyclePill, { cycleLabel, timeLeft } from "@/components/CyclePill";
 import CycleSelector from "@/components/CycleSelector";
@@ -223,6 +224,10 @@ export default function GroupDetailPage({
               }
             />
           </div>
+          <ActiveChallengesStrip
+            groupId={id}
+            onSeeAll={() => select("challenges")}
+          />
           {cycleOverride && leaderboard && leaderboard.entries.length > 0 && (
             <Podium entries={leaderboard.entries.slice(0, 3)} />
           )}

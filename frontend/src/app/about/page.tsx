@@ -5,7 +5,11 @@ export default function AboutPage() {
     <main className="mx-auto max-w-3xl px-4 sm:px-6 py-12 fade-up">
       <div className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-xl shadow-black/20 p-8">
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-center text-slate-100">
-          About <span className="text-orange-400">Summit</span>Stats
+          About{" "}
+          <span className="bg-gradient-to-r from-orange-400 via-orange-300 to-amber-300 bg-clip-text text-transparent">
+            Summit
+          </span>
+          Stats
         </h1>
         <p className="mt-6 text-slate-300 text-center max-w-xl mx-auto">
           A tech demo showing off Strava group challenges and leaderboards. Both

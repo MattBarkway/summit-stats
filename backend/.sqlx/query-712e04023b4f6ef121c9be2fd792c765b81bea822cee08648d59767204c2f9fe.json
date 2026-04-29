@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM segment_efforts WHERE start_date < $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "712e04023b4f6ef121c9be2fd792c765b81bea822cee08648d59767204c2f9fe"
+}

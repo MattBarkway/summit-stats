@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO earned_points\n            (group_id, athlete_id, activity_id, rule_id, points,\n             activity_name, activity_sport_type, activity_distance_m,\n             activity_moving_time_s, activity_elevation_m, activity_start_date)\n        SELECT\n            gm.group_id, gm.athlete_id, a.id, pr.id, pr.points,\n            a.name, a.sport_type, a.distance_m,\n            a.moving_time_s, a.elevation_m, a.start_date\n        FROM group_members gm\n        JOIN point_rules pr ON pr.group_id = gm.group_id\n        JOIN activities    a ON a.athlete_id = gm.athlete_id\n        WHERE gm.group_id = $1\n          AND (pr.sport_type IS NULL OR pr.sport_type = a.sport_type)\n          AND (\n            (pr.trigger_type = 'distance_km' AND a.distance_m / 1000.0 >= pr.threshold) OR\n            (pr.trigger_type = 'elevation_m' AND a.elevation_m         >= pr.threshold) OR\n            (pr.trigger_type = 'kom'         AND a.has_kom = TRUE) OR\n            (pr.trigger_type = 'top_ten'     AND a.has_top_ten = TRUE) OR\n            (pr.trigger_type = 'achievement' AND a.achievement_count::double precision >= pr.threshold)\n          )\n        ON CONFLICT (group_id, athlete_id, activity_id, rule_id) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1735570a7b6575f6cc823f9d998d06db9866fbcedbf10c9f1884b390a581fa14"
+}

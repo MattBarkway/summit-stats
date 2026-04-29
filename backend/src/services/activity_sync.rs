@@ -5,7 +5,11 @@ use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
 const DEBOUNCE_SECS: i64 = 300;
-const FIRST_SYNC_LOOKBACK_DAYS: i64 = 90;
+/// First-sync lookback. Compliance: raw Strava data must not live in cache
+/// past 7 days. We can sync up to the start of any group cycle the user is
+/// in (longer than 7d) because evaluate_for_group snapshots derived stats
+/// before the next purge. New users with no groups get a 7d slice.
+const FIRST_SYNC_FALLBACK_DAYS: i64 = 7;
 const SHORT_RATE_LIMIT_BUDGET: u32 = 180;
 const MAX_PAGES: u32 = 100;
 
@@ -32,7 +36,27 @@ pub async fn sync_activities(
 
     let after_ts: u64 = match last {
         Some(t) => t.unix_timestamp() as u64,
-        None => (now - Duration::days(FIRST_SYNC_LOOKBACK_DAYS)).unix_timestamp() as u64,
+        None => {
+            // First sync: cap at earliest cycle start across the user's groups,
+            // or fall back to a 7-day slice if they're in none.
+            let earliest_cycle = sqlx::query_scalar!(
+                r#"
+                SELECT MIN(cb.start_at) AS "start_at?"
+                FROM group_members gm
+                JOIN groups g            ON g.id = gm.group_id
+                CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb
+                WHERE gm.athlete_id = $1
+                "#,
+                athlete_id
+            )
+            .fetch_one(db)
+            .await
+            .map_err(|e| e.to_string())?;
+
+            let cutoff = earliest_cycle
+                .unwrap_or_else(|| now - Duration::days(FIRST_SYNC_FALLBACK_DAYS));
+            cutoff.unix_timestamp() as u64
+        }
     };
 
     let mut new_count: usize = 0;
@@ -160,6 +184,17 @@ async fn scan_segment_efforts(
     let mut has_kom = false;
     let mut has_top_ten = false;
 
+    struct Row {
+        id: i64,
+        segment_id: i64,
+        segment_name: Option<String>,
+        elapsed: i32,
+        start: OffsetDateTime,
+        kom_rank: Option<i32>,
+        pr_rank: Option<i32>,
+    }
+    let mut rows: Vec<Row> = Vec::new();
+
     if let Some(efforts) = detailed.segment_efforts.as_deref() {
         for effort in efforts {
             match effort.kom_rank {
@@ -168,14 +203,11 @@ async fn scan_segment_efforts(
                 _ => {}
             }
 
-            let (Some(eid), Some(elapsed), Some(start_chrono)) = (
-                effort.id,
-                effort.elapsed_time,
-                effort.start_date,
-            ) else {
+            let (Some(eid), Some(elapsed), Some(start_chrono)) =
+                (effort.id, effort.elapsed_time, effort.start_date)
+            else {
                 continue;
             };
-            // chrono::DateTime<Utc> → time::OffsetDateTime via timestamp.
             let Ok(start) = OffsetDateTime::from_unix_timestamp(start_chrono.timestamp()) else {
                 continue;
             };
@@ -185,23 +217,72 @@ async fn scan_segment_efforts(
             };
             let seg_name = segment.and_then(|s| s.name.clone());
 
-            sqlx::query!(
-                r#"
-                INSERT INTO segment_efforts
-                  (id, activity_id, athlete_id, segment_id, segment_name,
-                   elapsed_time_s, start_date, kom_rank, pr_rank)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                ON CONFLICT (id) DO NOTHING
-                "#,
-                eid,
-                activity_id,
-                athlete_id,
-                seg_id,
-                seg_name,
+            rows.push(Row {
+                id: eid,
+                segment_id: seg_id,
+                segment_name: seg_name,
                 elapsed,
                 start,
-                effort.kom_rank,
-                effort.pr_rank,
+                kom_rank: effort.kom_rank,
+                pr_rank: effort.pr_rank,
+            });
+        }
+    }
+
+    if !rows.is_empty() {
+        let mut qb = sqlx::QueryBuilder::new(
+            "INSERT INTO segment_efforts \
+             (id, activity_id, athlete_id, segment_id, segment_name, \
+              elapsed_time_s, start_date, kom_rank, pr_rank) ",
+        );
+        qb.push_values(&rows, |mut b, r| {
+            b.push_bind(r.id)
+                .push_bind(activity_id)
+                .push_bind(athlete_id)
+                .push_bind(r.segment_id)
+                .push_bind(&r.segment_name)
+                .push_bind(r.elapsed)
+                .push_bind(r.start)
+                .push_bind(r.kom_rank)
+                .push_bind(r.pr_rank);
+        });
+        qb.push(" ON CONFLICT (id) DO NOTHING");
+        qb.build()
+            .execute(db)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // Update segment_challenge_progress for any active challenge whose
+        // window contains this effort. Pure derived data; survives the
+        // 7-day raw-cache purge.
+        for r in &rows {
+            sqlx::query!(
+                r#"
+                INSERT INTO segment_challenge_progress
+                    (challenge_id, athlete_id, best_time_s, best_at, activity_id)
+                SELECT c.id, $1, $2, $3, $5
+                FROM segment_challenges c
+                WHERE c.segment_id = $4
+                  AND c.resolved_at IS NULL
+                  AND $3 >= c.starts_at AND $3 < c.ends_at
+                ON CONFLICT (challenge_id, athlete_id) DO UPDATE
+                SET best_time_s = LEAST(segment_challenge_progress.best_time_s, EXCLUDED.best_time_s),
+                    best_at = CASE
+                        WHEN EXCLUDED.best_time_s < segment_challenge_progress.best_time_s
+                        THEN EXCLUDED.best_at
+                        ELSE segment_challenge_progress.best_at
+                    END,
+                    activity_id = CASE
+                        WHEN EXCLUDED.best_time_s < segment_challenge_progress.best_time_s
+                        THEN EXCLUDED.activity_id
+                        ELSE segment_challenge_progress.activity_id
+                    END
+                "#,
+                athlete_id,
+                r.elapsed,
+                r.start,
+                r.segment_id,
+                activity_id,
             )
             .execute(db)
             .await
@@ -218,13 +299,14 @@ async fn scan_segment_efforts(
 pub async fn evaluate_for_group(db: &PgPool, group_id: uuid::Uuid) -> Result<(), String> {
     sqlx::query!(
         r#"
-        INSERT INTO earned_points (group_id, athlete_id, activity_id, rule_id, points)
+        INSERT INTO earned_points
+            (group_id, athlete_id, activity_id, rule_id, points,
+             activity_name, activity_sport_type, activity_distance_m,
+             activity_moving_time_s, activity_elevation_m, activity_start_date)
         SELECT
-            gm.group_id,
-            gm.athlete_id,
-            a.id,
-            pr.id,
-            pr.points
+            gm.group_id, gm.athlete_id, a.id, pr.id, pr.points,
+            a.name, a.sport_type, a.distance_m,
+            a.moving_time_s, a.elevation_m, a.start_date
         FROM group_members gm
         JOIN point_rules pr ON pr.group_id = gm.group_id
         JOIN activities    a ON a.athlete_id = gm.athlete_id
@@ -250,13 +332,14 @@ pub async fn evaluate_for_group(db: &PgPool, group_id: uuid::Uuid) -> Result<(),
 async fn evaluate_points(db: &PgPool, athlete_id: i64) -> Result<(), String> {
     sqlx::query!(
         r#"
-        INSERT INTO earned_points (group_id, athlete_id, activity_id, rule_id, points)
+        INSERT INTO earned_points
+            (group_id, athlete_id, activity_id, rule_id, points,
+             activity_name, activity_sport_type, activity_distance_m,
+             activity_moving_time_s, activity_elevation_m, activity_start_date)
         SELECT
-            gm.group_id,
-            gm.athlete_id,
-            a.id,
-            pr.id,
-            pr.points
+            gm.group_id, gm.athlete_id, a.id, pr.id, pr.points,
+            a.name, a.sport_type, a.distance_m,
+            a.moving_time_s, a.elevation_m, a.start_date
         FROM group_members gm
         JOIN point_rules pr ON pr.group_id = gm.group_id
         JOIN activities    a ON a.athlete_id = gm.athlete_id

@@ -27,6 +27,7 @@ export default function NavbarWrapper() {
 
   const items: NavItem[] = [
     { label: "Groups", href: "/groups" },
+    { label: "Settings", href: "/settings" },
     { label: "About", href: "/about" },
     { label: "Sign Out", href: "#", onClick: handleSignOut },
   ];

@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            g.id,\n            g.name,\n            g.description,\n            g.icon_url,\n            g.invite_code,\n            g.owner_id,\n            g.cycle_type       AS \"cycle_type!: CycleType\",\n            cb.start_at        AS \"cycle_start!\",\n            cb.end_at          AS \"cycle_end!\"\n        FROM groups g\n        CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n        WHERE g.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "icon_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "invite_code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "owner_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "cycle_type!: CycleType",
+        "type_info": {
+          "Custom": {
+            "name": "cycle_type",
+            "kind": {
+              "Enum": [
+                "weekly",
+                "monthly",
+                "quarterly",
+                "yearly",
+                "all_time"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "cycle_start!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "cycle_end!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "a2f63c5f8497806f7b5f9f149be446638316dc5f30eaee0788d04c2246eb2705"
+}

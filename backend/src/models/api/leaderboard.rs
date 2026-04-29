@@ -1,3 +1,4 @@
+use crate::models::api::cycle::CycleType;
 use serde::Serialize;
 use time::OffsetDateTime;
 
@@ -14,7 +15,7 @@ pub struct LeaderboardEntry {
 
 #[derive(Serialize)]
 pub struct LeaderboardResponse {
-    pub cycle_type: String,
+    pub cycle_type: CycleType,
     #[serde(with = "time::serde::rfc3339")]
     pub cycle_start: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]

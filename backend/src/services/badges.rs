@@ -1,3 +1,4 @@
+use crate::models::api::cycle::CycleType;
 use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -113,7 +114,7 @@ pub async fn award_closed_cycle_badges(db: &PgPool, group_id: Uuid) -> Result<()
             WHERE g.id = $1
         )
         SELECT
-            cycle_type::text AS "cycle_type!",
+            cycle_type       AS "cycle_type!: CycleType",
             curr_start       AS "curr_start!",
             CASE cycle_type
                 WHEN 'weekly'    THEN curr_start - INTERVAL '7 days'
@@ -131,7 +132,7 @@ pub async fn award_closed_cycle_badges(db: &PgPool, group_id: Uuid) -> Result<()
     .map_err(|e| e.to_string())?;
 
     let Some(prev) = prev else { return Ok(()) };
-    if prev.cycle_type == "all_time" {
+    if matches!(prev.cycle_type, CycleType::AllTime) {
         return Ok(());
     }
 

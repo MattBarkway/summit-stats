@@ -1,4 +1,5 @@
 use crate::models::api::badge::BadgeSummary;
+use crate::models::api::cycle::CycleType;
 use crate::models::api::feed::FeedEntry;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
@@ -38,7 +39,7 @@ pub struct GroupSummary {
     pub icon_url: Option<String>,
     pub member_count: i64,
     pub my_points: i64,
-    pub cycle_type: String,
+    pub cycle_type: CycleType,
     #[serde(with = "time::serde::rfc3339")]
     pub cycle_start: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
@@ -54,7 +55,7 @@ pub struct GroupDetail {
     pub invite_code: String,
     pub owner_id: i64,
     pub members: Vec<MemberSummary>,
-    pub cycle_type: String,
+    pub cycle_type: CycleType,
     #[serde(with = "time::serde::rfc3339")]
     pub cycle_start: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
@@ -67,7 +68,7 @@ pub struct GroupPreview {
     pub icon_url: Option<String>,
     pub member_count: i64,
     pub owner_name: String,
-    pub cycle_type: String,
+    pub cycle_type: CycleType,
     #[serde(with = "time::serde::rfc3339")]
     pub cycle_start: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
@@ -85,7 +86,7 @@ pub struct MemberDetail {
     pub activity_count: i64,
     pub total_distance_m: f64,
     pub total_elevation_m: f64,
-    pub cycle_type: String,
+    pub cycle_type: CycleType,
     #[serde(with = "time::serde::rfc3339")]
     pub cycle_start: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]

@@ -1,5 +1,7 @@
 "use client";
-import { ChevronRight } from "lucide-react";
+import { Crown, Mountain, Trophy } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,38 +38,61 @@ export default function Home() {
           Group challenges, leaderboards, and bragging rights — pulled live from
           your Strava activities.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={handleConnect}
-            className="group inline-flex items-center gap-2 rounded-xl bg-orange-400 px-7 py-4 text-base font-bold text-slate-950 shadow-lg shadow-orange-500/30 hover:bg-orange-500 hover:shadow-orange-500/50 transition-all"
+            aria-label="Connect with Strava"
+            className="cursor-pointer transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-md"
           >
-            Connect with Strava
-            <ChevronRight
-              size={18}
-              strokeWidth={2.5}
-              className="transition-transform group-hover:translate-x-0.5"
+            <Image
+              src="/strava/btn_connect_orange.svg"
+              alt="Connect with Strava"
+              width={237}
+              height={48}
+              priority
             />
           </button>
+          <Link
+            href="/privacy"
+            className="text-xs text-slate-400 underline-offset-4 hover:text-slate-200 hover:underline"
+          >
+            Privacy policy
+          </Link>
         </div>
       </section>
 
       <section className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Cycle", value: "monthly", suffix: "" },
-          { label: "Sports", value: "10+", suffix: "" },
-          { label: "Friction", value: "0", suffix: "" },
-        ].map((stat) => (
+          {
+            Icon: Trophy,
+            title: "Leaderboards",
+            body: "Weekly, monthly, quarterly, or yearly cycles. Points reset; rivalries don't.",
+          },
+          {
+            Icon: Mountain,
+            title: "Segment challenges",
+            body: "Pick a segment, set a deadline. Fastest in the window takes the bonus points.",
+          },
+          {
+            Icon: Crown,
+            title: "Badges & podiums",
+            body: "Cycle Champion. KOM Hunter. Centurion. Earn them, wear them.",
+          },
+        ].map(({ Icon, title, body }) => (
           <div
-            key={stat.label}
-            className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-6 text-center"
+            key={title}
+            className="rounded-2xl bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-md p-6 text-left"
           >
-            <p className="text-xs uppercase tracking-widest text-slate-500">
-              {stat.label}
-            </p>
-            <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight text-slate-100">
-              {stat.value}
-              <span className="text-orange-400">{stat.suffix}</span>
+            <Icon
+              size={22}
+              strokeWidth={2}
+              className="text-orange-400"
+              aria-hidden="true"
+            />
+            <h3 className="mt-3 text-lg font-bold text-slate-100">{title}</h3>
+            <p className="mt-1 text-sm text-slate-400 leading-relaxed">
+              {body}
             </p>
           </div>
         ))}

@@ -28,9 +28,9 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-slate-100 h-full flex flex-col relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-slate-100 min-h-screen flex flex-col relative`}
       >
         {/* Layered backdrop: solid bg, aurora glow, topo lines.
             pointer-events:none + will-change keeps it cheap on resize. */}
@@ -39,7 +39,7 @@ export default function RootLayout({
           className="fixed inset-0 -z-10 overflow-hidden bg-[#0b1020] pointer-events-none"
         >
           <div
-            className="absolute inset-0 aurora-drift"
+            className="absolute -inset-[20%] aurora-drift"
             style={{
               willChange: "transform",
               background:
@@ -55,9 +55,7 @@ export default function RootLayout({
 
         <ClientProvider>
           <NavbarWrapper />
-          <main className="pt-20 min-h-[calc(100vh-5rem)] flex-1 relative">
-            {children}
-          </main>
+          <main className="pt-20 flex-1 relative">{children}</main>
         </ClientProvider>
         <Footer />
       </body>

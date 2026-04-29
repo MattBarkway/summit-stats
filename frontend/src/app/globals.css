@@ -52,18 +52,23 @@ body {
 @keyframes aurora-drift {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
   33% {
-    transform: translate3d(2%, -3%, 0) scale(1.05);
+    transform: translate3d(1.2%, -1.5%, 0);
   }
   66% {
-    transform: translate3d(-2%, 2%, 0) scale(0.97);
+    transform: translate3d(-1.2%, 1.2%, 0);
   }
 }
 
 .aurora-drift {
-  animation: aurora-drift 30s ease-in-out infinite;
+  animation: aurora-drift 45s ease-in-out infinite;
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+  /* force a stable compositor layer so the radial-gradient is rasterised
+     once, not re-rendered each animation tick. */
+  filter: blur(0);
 }
 
 @keyframes fade-up {

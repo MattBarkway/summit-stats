@@ -31,6 +31,7 @@ pub struct AppState {
     pub client_secret: String,
     pub backend_url: String,
     pub frontend_url: String,
+    pub webhook_verify_token: String,
 }
 
 #[tokio::main]
@@ -71,6 +72,15 @@ async fn main() {
         .trim()
         .to_string();
     tracing::info!("Got FRONTEND_URL...");
+    let webhook_verify_token = std::env::var("STRAVA_WEBHOOK_VERIFY_TOKEN")
+        .unwrap_or_else(|_| {
+            tracing::warn!(
+                "STRAVA_WEBHOOK_VERIFY_TOKEN not set — webhook endpoint will reject all subscriptions"
+            );
+            String::new()
+        })
+        .trim()
+        .to_string();
     let db_url = format!(
         "postgres://{}:{}@{}:5432/{}",
         std::env::var("DATABASE_USER")
@@ -155,6 +165,7 @@ async fn main() {
         backend_url,
         strava_url,
         frontend_url,
+        webhook_verify_token,
     });
 
     let app = routes::routes()

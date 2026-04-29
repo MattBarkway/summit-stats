@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            u.athlete_id,\n            u.firstname,\n            u.lastname,\n            u.profile_url,\n            COALESCE(SUM(ep.points), 0)::bigint    AS \"total_points!\",\n            COUNT(DISTINCT ep.activity_id)::bigint AS \"activity_count!\"\n        FROM group_members gm\n        JOIN users u ON u.athlete_id = gm.athlete_id\n        LEFT JOIN earned_points ep\n          ON ep.group_id = gm.group_id\n         AND ep.athlete_id = gm.athlete_id\n        WHERE gm.group_id = $1\n          AND (\n            ep.id IS NULL\n            OR (\n              COALESCE(ep.activity_start_date, ep.earned_at) >= $2\n              AND COALESCE(ep.activity_start_date, ep.earned_at) <  $3\n            )\n          )\n        GROUP BY u.athlete_id, u.firstname, u.lastname, u.profile_url\n        ORDER BY COALESCE(SUM(ep.points), 0) DESC, u.athlete_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "athlete_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "firstname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "lastname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "profile_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "total_points!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "activity_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "e35c28753f43cdc841b0fb8bd2f94b7ab6163620e2b98a00e055b4fce28a09d0"
+}

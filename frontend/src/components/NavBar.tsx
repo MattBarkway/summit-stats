@@ -22,7 +22,9 @@ export default function Navbar({ items }: NavbarProps) {
     <nav className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,60rem)]">
       <div className="bg-white/5 backdrop-blur-xl ring-1 ring-white/10 rounded-full shadow-lg shadow-black/30 px-4 py-2 flex items-center justify-between">
         <Link href="/" className="text-lg font-extrabold tracking-tight">
-          <span className="text-orange-400">Summit</span>
+          <span className="bg-gradient-to-r from-orange-400 via-orange-300 to-amber-300 bg-clip-text text-transparent">
+            Summit
+          </span>
           <span className="text-slate-100">Stats</span>
         </Link>
         <div className="hidden md:flex items-center gap-1 text-sm font-medium">

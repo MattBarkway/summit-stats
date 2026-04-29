@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            g.cycle_type       AS \"cycle_type!: CycleType\",\n            cb.start_at        AS \"start_at!\",\n            cb.end_at          AS \"end_at!\"\n        FROM groups g\n        CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n        WHERE g.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cycle_type!: CycleType",
+        "type_info": {
+          "Custom": {
+            "name": "cycle_type",
+            "kind": {
+              "Enum": [
+                "weekly",
+                "monthly",
+                "quarterly",
+                "yearly",
+                "all_time"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "start_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "end_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "99f8873607466b34f3948fe3f1f3a4922b71a8eeb1f553dd94814930b15dcc6d"
+}

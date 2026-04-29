@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM earned_points WHERE activity_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1e245b0f82f92624ff0634ace7485a0f81ee08d815b61a28e9b13dbc6fc89ec1"
+}

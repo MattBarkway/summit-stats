@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT MIN(cb.start_at) AS \"start_at?\"\n                FROM group_members gm\n                JOIN groups g            ON g.id = gm.group_id\n                CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n                WHERE gm.athlete_id = $1\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "start_at?",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "552a3e2255283d381d587207dbf7d446123fea9f33d1625f48f096f5e103ef99"
+}

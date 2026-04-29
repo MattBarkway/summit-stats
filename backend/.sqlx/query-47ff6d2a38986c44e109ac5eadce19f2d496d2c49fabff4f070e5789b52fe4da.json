@@ -1,0 +1,132 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            ep.id,\n            ep.earned_at,\n            ep.points,\n            u.athlete_id,\n            u.firstname,\n            u.lastname,\n            u.profile_url,\n            ep.activity_id            AS \"activity_id?\",\n            ep.activity_name          AS \"activity_name?\",\n            ep.activity_sport_type    AS \"activity_sport_type?\",\n            ep.activity_distance_m    AS \"activity_distance_m?\",\n            ep.activity_moving_time_s AS \"activity_moving_time_s?\",\n            ep.activity_elevation_m   AS \"activity_elevation_m?\",\n            ep.activity_start_date    AS \"activity_start_date?\",\n            pr.trigger_type AS \"trigger_type!: TriggerType\",\n            pr.threshold,\n            pr.sport_type   AS rule_sport_type\n        FROM earned_points ep\n        JOIN users u           ON u.athlete_id = ep.athlete_id\n        JOIN point_rules pr    ON pr.id = ep.rule_id\n        WHERE ep.group_id = $1\n        ORDER BY COALESCE(ep.activity_start_date, ep.earned_at) DESC\n        LIMIT 100\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "earned_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "points",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "athlete_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "firstname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "lastname",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "profile_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "activity_id?",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "activity_name?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "activity_sport_type?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "activity_distance_m?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 11,
+        "name": "activity_moving_time_s?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "activity_elevation_m?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 13,
+        "name": "activity_start_date?",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "trigger_type!: TriggerType",
+        "type_info": {
+          "Custom": {
+            "name": "point_trigger",
+            "kind": {
+              "Enum": [
+                "distance_km",
+                "elevation_m",
+                "kom",
+                "achievement",
+                "top_ten",
+                "segment_challenge"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "threshold",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 16,
+        "name": "rule_sport_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "47ff6d2a38986c44e109ac5eadce19f2d496d2c49fabff4f070e5789b52fe4da"
+}

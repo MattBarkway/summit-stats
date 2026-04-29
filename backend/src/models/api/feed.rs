@@ -1,3 +1,4 @@
+use crate::models::api::rule::TriggerType;
 use serde::Serialize;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -20,7 +21,7 @@ pub struct FeedEntry {
     pub activity_elevation_m: Option<f64>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub activity_start_date: Option<OffsetDateTime>,
-    pub trigger_type: String,
+    pub trigger_type: TriggerType,
     pub threshold: f64,
     pub rule_sport_type: Option<String>,
 }

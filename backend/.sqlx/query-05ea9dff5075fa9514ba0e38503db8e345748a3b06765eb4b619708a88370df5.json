@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            g.id,\n            g.name,\n            g.description,\n            g.icon_url,\n            g.cycle_type       AS \"cycle_type!: CycleType\",\n            cb.start_at        AS \"cycle_start!\",\n            cb.end_at          AS \"cycle_end!\",\n            (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) AS \"member_count!\",\n            COALESCE((\n                SELECT SUM(ep.points)::bigint\n                FROM earned_points ep\n                WHERE ep.group_id = g.id\n                  AND ep.athlete_id = $1\n                  AND COALESCE(ep.activity_start_date, ep.earned_at) >= cb.start_at\n                  AND COALESCE(ep.activity_start_date, ep.earned_at) <  cb.end_at\n            ), 0) AS \"my_points!\"\n        FROM groups g\n        CROSS JOIN LATERAL cycle_bounds(g.cycle_type) cb\n        JOIN group_members gm ON gm.group_id = g.id\n        WHERE gm.athlete_id = $1\n        ORDER BY g.created_at DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "icon_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "cycle_type!: CycleType",
+        "type_info": {
+          "Custom": {
+            "name": "cycle_type",
+            "kind": {
+              "Enum": [
+                "weekly",
+                "monthly",
+                "quarterly",
+                "yearly",
+                "all_time"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "cycle_start!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "cycle_end!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "member_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "my_points!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "05ea9dff5075fa9514ba0e38503db8e345748a3b06765eb4b619708a88370df5"
+}

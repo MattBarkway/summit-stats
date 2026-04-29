@@ -1,5 +1,4 @@
 use sqlx::PgPool;
-use time::OffsetDateTime;
 use uuid::Uuid;
 
 const MAX_PER_BATCH: i64 = 5;
@@ -10,8 +9,7 @@ const MAX_PER_BATCH: i64 = 5;
 pub async fn resolve_expired(db: &PgPool, group_id: Uuid) -> Result<(), String> {
     let challenges = sqlx::query!(
         r#"
-        SELECT id, segment_id, starts_at, ends_at,
-               points_winner, points_top3, points_finish
+        SELECT id, points_winner, points_top3, points_finish
         FROM segment_challenges
         WHERE group_id = $1 AND ends_at < NOW() AND resolved_at IS NULL
         ORDER BY ends_at
@@ -29,9 +27,6 @@ pub async fn resolve_expired(db: &PgPool, group_id: Uuid) -> Result<(), String> 
             db,
             group_id,
             c.id,
-            c.segment_id,
-            c.starts_at,
-            c.ends_at,
             c.points_winner,
             c.points_top3,
             c.points_finish,
@@ -46,42 +41,26 @@ async fn resolve_one(
     db: &PgPool,
     group_id: Uuid,
     challenge_id: Uuid,
-    segment_id: i64,
-    starts_at: OffsetDateTime,
-    ends_at: OffsetDateTime,
     points_winner: i32,
     points_top3: i32,
     points_finish: i32,
 ) -> Result<(), String> {
-    // Best effort per group member within the window.
+    // Best per group member from the derived progress ledger. Independent
+    // of segment_efforts cache TTL.
     let bests = sqlx::query!(
         r#"
         SELECT
-            se.athlete_id,
-            MIN(se.elapsed_time_s)::int4 AS "best!",
-            (
-                SELECT se2.activity_id
-                FROM segment_efforts se2
-                WHERE se2.segment_id = $1
-                  AND se2.athlete_id = se.athlete_id
-                  AND se2.start_date >= $2
-                  AND se2.start_date <  $3
-                ORDER BY se2.elapsed_time_s ASC
-                LIMIT 1
-            ) AS "winning_activity!"
-        FROM segment_efforts se
+            scp.athlete_id,
+            scp.best_time_s AS "best!",
+            scp.activity_id AS "winning_activity?"
+        FROM segment_challenge_progress scp
         JOIN group_members gm
-          ON gm.athlete_id = se.athlete_id AND gm.group_id = $4
-        WHERE se.segment_id = $1
-          AND se.start_date >= $2
-          AND se.start_date <  $3
-        GROUP BY se.athlete_id
-        ORDER BY MIN(se.elapsed_time_s) ASC
+          ON gm.athlete_id = scp.athlete_id AND gm.group_id = $1
+        WHERE scp.challenge_id = $2
+        ORDER BY scp.best_time_s ASC
         "#,
-        segment_id,
-        starts_at,
-        ends_at,
         group_id,
+        challenge_id,
     )
     .fetch_all(db)
     .await

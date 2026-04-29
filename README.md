@@ -1,7 +1,34 @@
 # strava_analyser
 Web service for analysing a user's strava data
 
-future features:
+## Strava webhook bootstrap (one-time per environment)
+
+The backend exposes `GET/POST /webhooks/strava` for Strava push notifications
+(activity create/update/delete + athlete deauthorisation). Strava needs to
+know the callback URL — register it once per environment.
+
+1. Set `STRAVA_WEBHOOK_VERIFY_TOKEN` in the backend env to any random string.
+2. Register the subscription:
+
+   ```bash
+   curl -X POST https://www.strava.com/api/v3/push_subscriptions \
+     -F client_id="$CLIENT_ID" \
+     -F client_secret="$CLIENT_SECRET" \
+     -F callback_url="https://<your-backend-host>/webhooks/strava" \
+     -F verify_token="$STRAVA_WEBHOOK_VERIFY_TOKEN"
+   ```
+
+   Strava hits `GET /webhooks/strava` for handshake; backend echoes the
+   challenge if the verify token matches. On success Strava returns the
+   subscription `id`.
+
+3. List active subscriptions:
+   `curl "https://www.strava.com/api/v3/push_subscriptions?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET"`
+4. Delete one:
+   `curl -X DELETE "https://www.strava.com/api/v3/push_subscriptions/<id>?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET"`
+
+Only one subscription per app is allowed.
+
 - Segment challenges, extra points for best time on a segment before a deadline
 - historic leaderboard view, see previous winners
 - Group invite should show name of group and member count, not invite code

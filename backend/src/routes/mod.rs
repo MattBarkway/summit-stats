@@ -2,6 +2,7 @@ pub mod activities;
 pub mod auth;
 pub mod groups;
 mod me;
+pub mod webhooks;
 
 use crate::AppState;
 use axum::Router;
@@ -13,4 +14,5 @@ pub fn routes() -> Router<Arc<AppState>> {
         .nest("/auth", auth::routes())
         .nest("/groups", groups::routes())
         .nest("/me", me::routes())
+        .nest("/webhooks", webhooks::routes())
 }

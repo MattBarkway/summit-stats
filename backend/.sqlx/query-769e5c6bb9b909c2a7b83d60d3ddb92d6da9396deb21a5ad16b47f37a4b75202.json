@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            scp.athlete_id,\n            scp.best_time_s AS \"best!\",\n            scp.activity_id AS \"winning_activity?\"\n        FROM segment_challenge_progress scp\n        JOIN group_members gm\n          ON gm.athlete_id = scp.athlete_id AND gm.group_id = $1\n        WHERE scp.challenge_id = $2\n        ORDER BY scp.best_time_s ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "athlete_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "best!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "winning_activity?",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "769e5c6bb9b909c2a7b83d60d3ddb92d6da9396deb21a5ad16b47f37a4b75202"
+}

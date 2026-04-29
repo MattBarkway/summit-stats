@@ -1,0 +1,60 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, trigger_type AS \"trigger_type!: TriggerType\", threshold, points, sport_type\n        FROM point_rules WHERE id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "trigger_type!: TriggerType",
+        "type_info": {
+          "Custom": {
+            "name": "point_trigger",
+            "kind": {
+              "Enum": [
+                "distance_km",
+                "elevation_m",
+                "kom",
+                "achievement",
+                "top_ten",
+                "segment_challenge"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "threshold",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "points",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "sport_type",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "87f0ebb66d6695a4b09c6ecfd3eaa6124663679e00cd8932cc8068da1881406e"
+}

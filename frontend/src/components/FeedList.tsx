@@ -28,56 +28,56 @@ function eventIcon(e: FeedEntry): IconStyle {
     case "kom":
       return {
         Icon: Trophy,
-        bg: "bg-amber-500/20",
-        fg: "text-amber-300",
+        bg: "bg-amber-500",
+        fg: "text-slate-950",
       };
     case "segment_challenge":
       return {
         Icon: Trophy,
-        bg: "bg-fuchsia-500/20",
-        fg: "text-fuchsia-300",
+        bg: "bg-fuchsia-500",
+        fg: "text-white",
       };
     case "top_ten":
       return {
         Icon: Medal,
-        bg: "bg-slate-300/20",
-        fg: "text-slate-200",
+        bg: "bg-slate-300",
+        fg: "text-slate-900",
       };
     case "achievement":
       return {
         Icon: Award,
-        bg: "bg-violet-500/20",
-        fg: "text-violet-300",
+        bg: "bg-violet-500",
+        fg: "text-white",
       };
     case "elevation_m":
       return {
         Icon: Mountain,
-        bg: "bg-stone-300/15",
-        fg: "text-stone-200",
+        bg: "bg-stone-400",
+        fg: "text-stone-950",
       };
     case "distance_km":
       if (e.rule_sport_type === "Ride")
         return {
           Icon: Bike,
-          bg: "bg-cyan-500/20",
-          fg: "text-cyan-300",
+          bg: "bg-cyan-500",
+          fg: "text-slate-950",
         };
       if (e.rule_sport_type === "Run")
         return {
           Icon: Footprints,
-          bg: "bg-emerald-500/20",
-          fg: "text-emerald-300",
+          bg: "bg-emerald-500",
+          fg: "text-slate-950",
         };
       return {
         Icon: ActivityIcon,
-        bg: "bg-white/10",
-        fg: "text-slate-300",
+        bg: "bg-slate-700",
+        fg: "text-slate-100",
       };
     default:
       return {
         Icon: ActivityIcon,
-        bg: "bg-white/10",
-        fg: "text-slate-300",
+        bg: "bg-slate-700",
+        fg: "text-slate-100",
       };
   }
 }
@@ -92,7 +92,7 @@ type Tier = {
 function tierFor(points: number): Tier {
   if (points >= 250) {
     return {
-      card: "shimmer-bg bg-gradient-to-r from-amber-500/20 via-yellow-400/15 to-amber-500/20 ring-2 ring-amber-400/60 shadow-lg shadow-amber-500/20",
+      card: "shimmer-bg bg-gradient-to-r from-amber-500/30 via-yellow-400/25 to-amber-500/30 ring-2 ring-amber-400/60 shadow-lg shadow-amber-500/20",
       points: "text-amber-300 text-base",
       badgeRing: "ring-amber-400",
       sparkles: 2,
@@ -100,7 +100,7 @@ function tierFor(points: number): Tier {
   }
   if (points >= 150) {
     return {
-      card: "bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 ring-1 ring-violet-400/50 shadow-md",
+      card: "bg-gradient-to-r from-violet-500/25 to-fuchsia-500/25 ring-1 ring-violet-400/50 shadow-md",
       points: "text-violet-300 text-base",
       badgeRing: "ring-violet-400",
       sparkles: 1,
@@ -108,20 +108,20 @@ function tierFor(points: number): Tier {
   }
   if (points >= 75) {
     return {
-      card: "bg-cyan-500/10 ring-1 ring-cyan-400/40",
+      card: "bg-cyan-500/20 ring-1 ring-cyan-400/40",
       points: "text-cyan-300",
       badgeRing: "ring-cyan-400",
     };
   }
   if (points >= 40) {
     return {
-      card: "bg-emerald-500/10 ring-1 ring-emerald-400/30",
+      card: "bg-emerald-500/20 ring-1 ring-emerald-400/30",
       points: "text-emerald-300",
       badgeRing: "ring-emerald-400/60",
     };
   }
   return {
-    card: "bg-white/5 ring-1 ring-white/10",
+    card: "bg-white/10 ring-1 ring-white/15",
     points: "text-orange-300",
     badgeRing: "ring-white/20",
   };
@@ -259,7 +259,9 @@ export default function FeedList({
                 href={`https://www.strava.com/activities/${head.activity_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-slate-100 hover:text-orange-300"
+                aria-label={`View on Strava: ${head.activity_name ?? `Activity ${head.activity_id}`}`}
+                title="View on Strava"
+                className="inline-flex items-center gap-1 font-medium text-[#FC5200] hover:text-orange-400 underline-offset-4 hover:underline"
               >
                 {head.activity_name ?? `Activity ${head.activity_id}`}
                 <ExternalLink

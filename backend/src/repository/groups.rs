@@ -1,5 +1,5 @@
 use crate::errors::{AppError, AppResult};
-use crate::models::api::cycle::CycleBounds;
+use crate::models::api::cycle::{CycleBounds, CycleType};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -17,7 +17,7 @@ pub async fn fetch_cycle_bounds(db: &PgPool, group_id: Uuid) -> AppResult<CycleB
     let row = sqlx::query!(
         r#"
         SELECT
-            g.cycle_type::text AS "cycle_type!",
+            g.cycle_type       AS "cycle_type!: CycleType",
             cb.start_at        AS "start_at!",
             cb.end_at          AS "end_at!"
         FROM groups g

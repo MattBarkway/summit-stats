@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM tokens WHERE athlete_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4f2275d9a4791dc1b7bc7688e1c28f0e7f7d7c05ff24b306e430dd92bb0225eb"
+}
